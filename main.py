@@ -1,5 +1,5 @@
 import argparse
-from extractor import extract_code
+import utils
 
 # Parse command line arguments repo folder
 # parser = argparse.ArgumentParser()
@@ -11,7 +11,9 @@ repo = '../gradio-cotor/gradio'
 folders = ['gradio', 'test']
 repo_folders = [f"{repo}/{folder}" for folder in folders]
 
-df = extract_code(repo, repo_folders)
+df = utils.extract_code(repo, repo_folders)
+
+df = utils.explain_code(df)
 
 # print(df)
 # print(df[df['file'] == 'dataframe.py']['code'].tolist()[0][0]['code'])

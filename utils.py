@@ -1,11 +1,21 @@
 import os
 import ast
 import pandas as pd
+import tenacity
+
 from typing import List
 
 def extract_code (repo: str, repo_folders: List[str]) -> pd.DataFrame:
+    """
+    Extracts code from a list of folders in a repo and returns a dataframe with the code and metadata
+    Args:
+    - repo: str, name of the repo
+    - repo_folders: List[str], list of folders in the repo to extract code from
+    Returns:
+    - df: pd.DataFrame, pandas dataframe with the code and metadata
+    """
 
-    df = pd.DataFrame(columns=['repo', 'folder', 'file', 'code'])
+    df = pd.DataFrame(columns=['repo', 'folder', 'file', 'codeData'])
     # Start going through the repo folders
     for folder in repo_folders:
         for root, dirs, files in os.walk(folder):
@@ -14,9 +24,11 @@ def extract_code (repo: str, repo_folders: List[str]) -> pd.DataFrame:
                     # Add row to dataframe
                     new_row = pd.DataFrame({'repo': [repo], 'folder': [root], 'file': [file]})
                     # Use ast to parse the file
-                    # if file == 'dataframe.py':
                     with open(f"{root}/{file}", 'r') as f:
                         source_code = f.read()
+                        # Handle empty files
+                        if source_code == '':
+                            continue
                         f.seek(0)
                         all_lines = f.readlines()
                         tree = ast.parse(source_code)
@@ -60,6 +72,46 @@ def extract_code (repo: str, repo_folders: List[str]) -> pd.DataFrame:
                                     'code': codeBlock
                                 })
                             # Add codeBlocks to new_row
-                            new_row['code'] = [codeBlocks]
+                            new_row['codeData'] = [codeBlocks]
                     df = pd.concat([df, new_row], ignore_index=True)
+    return df
+
+def explain_code (df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Uses an LLM to generate explanations for the code blocks
+    Args:
+    - df: pd.DataFrame, pandas dataframe with the code and metadata
+    Returns:
+    - df: pd.DataFrame, pandas dataframe with explains added to code and metadata
+    """
+
+    for index, row in df.iterrows():
+        if row['file'] == 'dataframe.py':
+            for codeBlock in row['codeData']:
+                # print(codeBlock['code'])
+                url = "https://api.perplexity.ai/chat/completions"
+
+                payload = {
+                    "model": "codellama-34b-instruct",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "Be precise and concise."
+                        },
+                        {
+                            "role": "user",
+                            "content": "How many stars are there in our galaxy?"
+                        }
+                    ]
+                }
+                headers = {
+                    "accept": "application/json",
+                    "content-type": "application/json",
+                    "authorization": "Bearer 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"
+                }
+
+                response = requests.post(url, json=payload, headers=headers)
+
+                print(response.text)
+
     return df
