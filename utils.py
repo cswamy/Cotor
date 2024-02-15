@@ -2,6 +2,8 @@ import os
 import ast
 import pandas as pd
 import tenacity
+import requests
+from dotenv import load_dotenv
 
 from typing import List
 
@@ -17,6 +19,7 @@ def extract_code (repo: str, repo_folders: List[str]) -> pd.DataFrame:
 
     df = pd.DataFrame(columns=['repo', 'folder', 'file', 'codeData'])
     # Start going through the repo folders
+    codeBlockID = 0
     for folder in repo_folders:
         for root, dirs, files in os.walk(folder):
             for file in files:
@@ -40,15 +43,18 @@ def extract_code (repo: str, repo_folders: List[str]) -> pd.DataFrame:
                             setupCodeEndLineno = node.end_lineno
                         # Extract setup code
                         setupCode = ''.join(all_lines[:setupCodeEndLineno])
-                        # Get main code blocks and metadata
+                        # Get setup code block and metadata
                         codeBlocks = []
+                        codeBlockID += 1
                         codeBlocks.append({
+                            'codeBlockID': codeBlockID,
                             'codeType': 'setup',
                             'name': 'n/a',
                             'startLineno': 0,
                             'endLineno': setupCodeEndLineno,
                             'code': setupCode
                         })
+                        # Get all other code blocks
                         for node in ast.iter_child_nodes(tree):
                             if node.lineno > setupCodeEndLineno:
                                 startLineno = node.lineno
@@ -64,7 +70,9 @@ def extract_code (repo: str, repo_folders: List[str]) -> pd.DataFrame:
                                     codeBlockType = 'other'
                                     codeBlockName = 'n/a'
                                 #print(f"CodeBlock: {codeBlockType}, Name: {codeBlockName}, Start: {startLineno}, End: {endLineno}")
+                                codeBlockID += 1
                                 codeBlocks.append({
+                                    'codeBlockID': codeBlockID,
                                     'codeType': codeBlockType,
                                     'name': codeBlockName,
                                     'startLineno': startLineno,
@@ -88,30 +96,35 @@ def explain_code (df: pd.DataFrame) -> pd.DataFrame:
     for index, row in df.iterrows():
         if row['file'] == 'dataframe.py':
             for codeBlock in row['codeData']:
-                # print(codeBlock['code'])
-                url = "https://api.perplexity.ai/chat/completions"
 
+                if codeBlock['codeType'] == 'setup' or codeBlock['codeType'] == 'function':
+                    continue
+                
+                url = "https://api.perplexity.ai/chat/completions"
                 payload = {
                     "model": "codellama-34b-instruct",
                     "messages": [
                         {
                             "role": "system",
-                            "content": "Be precise and concise."
+                            "content": "Be precise and concise. You are a teacher explaining code to a student."
                         },
                         {
                             "role": "user",
-                            "content": "How many stars are there in our galaxy?"
+                            "content": codeBlock['code']
                         }
-                    ]
+                    ],
+                    "temperature": 0,
                 }
+                load_dotenv()
                 headers = {
                     "accept": "application/json",
                     "content-type": "application/json",
-                    "authorization": "Bearer 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"
+                    "authorization": f"Bearer {os.getenv('PERPLEXITY_API_KEY')}",
                 }
-
                 response = requests.post(url, json=payload, headers=headers)
 
-                print(response.text)
+                print(codeBlock['code'])
+                print("-"*80)
+                print(f"{response.json()['choices'][0]['message']['content']}\n\n")
 
     return df
