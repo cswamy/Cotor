@@ -19,3 +19,10 @@ df = utils.explain_code(df)
 
 # print(df)
 # print(df[df['file'] == 'dropdown.py']['codeData'].tolist())
+for index, row in df.iterrows():
+        if row['file'] == 'dataframe.py':
+            for codeBlock in row['codeData']:
+                print(codeBlock['code'])
+                print('-'*50)
+                print(codeBlock['explanation'])
+                print('*'*50)

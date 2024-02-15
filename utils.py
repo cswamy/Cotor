@@ -1,10 +1,10 @@
 import os
 import ast
 import pandas as pd
-import tenacity
 import requests
-from dotenv import load_dotenv
 
+from tenacity import retry, stop_after_attempt, wait_random_exponential
+from dotenv import load_dotenv
 from typing import List
 
 def extract_code (repo: str, repo_folders: List[str]) -> pd.DataFrame:
@@ -92,15 +92,27 @@ def explain_code (df: pd.DataFrame) -> pd.DataFrame:
     Returns:
     - df: pd.DataFrame, pandas dataframe with explains added to code and metadata
     """
+    
+    url = "https://api.perplexity.ai/chat/completions"
+
+    load_dotenv()
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "authorization": f"Bearer {os.getenv('PERPLEXITY_API_KEY')}",
+    } 
+
+    @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+    def call_llm(url: str, payload: dict, headers: dict):
+        """
+        Helper function to call LLMs with exponential backoff
+        """
+        response = requests.post(url, json=payload, headers=headers)
+        return response
 
     for index, row in df.iterrows():
         if row['file'] == 'dataframe.py':
             for codeBlock in row['codeData']:
-
-                if codeBlock['codeType'] == 'setup' or codeBlock['codeType'] == 'function':
-                    continue
-                
-                url = "https://api.perplexity.ai/chat/completions"
                 payload = {
                     "model": "codellama-34b-instruct",
                     "messages": [
@@ -115,16 +127,12 @@ def explain_code (df: pd.DataFrame) -> pd.DataFrame:
                     ],
                     "temperature": 0,
                 }
-                load_dotenv()
-                headers = {
-                    "accept": "application/json",
-                    "content-type": "application/json",
-                    "authorization": f"Bearer {os.getenv('PERPLEXITY_API_KEY')}",
-                }
-                response = requests.post(url, json=payload, headers=headers)
+                response = call_llm(url, payload, headers)
 
-                print(codeBlock['code'])
-                print("-"*80)
-                print(f"{response.json()['choices'][0]['message']['content']}\n\n")
+                # print(codeBlock['code'])
+                # print("-"*80)
+                # print(f"{response.json()['choices'][0]['message']['content']}\n\n")
 
+                # add new field text to codeBlock
+                codeBlock['explanation'] = response.json()['choices'][0]['message']['content']
     return df
