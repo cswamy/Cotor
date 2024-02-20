@@ -111,7 +111,7 @@ def explain_code (df: pd.DataFrame) -> pd.DataFrame:
         return response
 
     for index, row in df.iterrows():
-        if row['file'] == 'dataframe.py':
+        if row['file'] == 'line_plot.py':
             for codeBlock in row['codeData']:
                 payload = {
                     "model": "codellama-34b-instruct",
