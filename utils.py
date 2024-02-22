@@ -4,7 +4,7 @@ import pprint
 import json
 
 from dotenv import load_dotenv
-from typing import List
+from typing import List, Tuple
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from bs4 import BeautifulSoup
 
@@ -106,6 +106,32 @@ def get_merge_commit(owner: str, repo: str, issue: dict) -> str:
     return pr_merge_sha
 
 def get_commit_details(owner: str, repo:str, ref: str):
+
+    def process_patch(patch: str):
+        # split patch into lines
+        lines = patch.split('\n')
+        code_del_ptr = 0
+        code_add_ptr = 0
+        code_add_end_ptr = 0
+        for line in lines:
+            # if line starts with @@, it's a hunk header
+            if line.startswith('@@'):
+                hunk_header = line.split(' ')
+                # code_del_ptr = int(hunk_header[1].split(',')[0].replace('-', ''))
+                code_add_ptr = int(hunk_header[2].split(',')[0].replace('+', ''))
+                code_change_encountered = False
+                print(f"code_add_ptr: {code_add_ptr}, code_add_end_ptr: {code_add_end_ptr}")
+            
+            # move code add pointer down in patch until we find line with +
+            elif line.startswith('+'):
+                code_change_encountered = True
+                code_add_end_ptr = code_add_ptr + 1
+            else:
+                if code_change_encountered:
+                    continue 
+                else:
+                    code_add_ptr += 1
+                    # print(f"updated add ptr: {code_add_ptr}")
     
     url = f'https://api.github.com/repos/{owner}/{repo}/commits/{ref}'
     response = call_github_api(url)
@@ -117,10 +143,19 @@ def get_commit_details(owner: str, repo:str, ref: str):
     for file in json_response['files']:
         file_detail = {}
         file_detail['filename'] = file['filename']
-        file_detail['patch'] = file['patch']
+        file_detail['status'] = file['status']
+        file_detail['changes'] = file['changes']
+        file_detail['raw_patch'] = file['patch']
+        file_detail['raw_url'] = file['raw_url']
+        if file['status'] == 'added':
+            file_detail['new_code_lines'] = len(file['patch'].split('\n'))-1
+        else:
+            if file['filename'] == 'gradio/components/dataframe.py':
+                file_detail['new_code_lines'] = process_patch(file['patch'])
+                break
         file_details.append(file_detail)
-
+    
     commit_details['file_details'] = file_details
-    pprint.pprint(commit_details)
+    # pprint.pprint(commit_details)
     
     return None
