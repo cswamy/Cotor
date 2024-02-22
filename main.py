@@ -13,5 +13,6 @@ issue_number = 6973
 issue = utils.get_issue(owner, repo, issue_number)
 
 if issue is not None:
-    pull_request = utils.get_pull_request(issue)
-    print(pull_request)
+    pr_merge_sha = utils.get_merge_commit(owner, repo, issue)
+    if pr_merge_sha is not None:
+        utils.get_commit_details(owner, repo, pr_merge_sha)

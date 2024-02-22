@@ -14,7 +14,7 @@ def call_github_api(url: str):
     token = os.getenv('GITHUB_TOKEN')
     header = {
         'Authorization': f'Bearer {token}',
-        'Accept': 'application/vnd.github.v3+json',
+        'Accept': 'application/vnd.github+json',
         'User-Agent': 'cotor.ai',
     }
     try:
@@ -72,7 +72,7 @@ def get_issue(owner: str, repo: str, issue_number: int) -> dict:
 
     return response.json()
 
-def get_pull_request(issue: dict):
+def get_merge_commit(owner: str, repo: str, issue: dict) -> str:
 
     html_url = issue['html_url']
     html = call_github_api(html_url).text
@@ -82,7 +82,7 @@ def get_pull_request(issue: dict):
     search_phrase = "Successfully merging a pull request may close this issue."
     search_element = soup.find(text=search_phrase)
 
-    pr_number = None
+    pr_merge_sha = None
     if search_element:
         next_div = search_element.find_next('div')
         if next_div:
@@ -90,6 +90,12 @@ def get_pull_request(issue: dict):
             if first_link and first_link.has_attr('href'):
                 if 'pull' in first_link['href']:
                     pr_number = first_link['href'].split('/')[-1]
+                    url = f'https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}'
+                    pr_details = call_github_api(url)
+                    if pr_details.json()['merged'] == True:
+                        pr_merge_sha = pr_details.json()['merge_commit_sha']
+                    else:
+                        print(f'[INFO] Pull request {pr_number} for issue {issue["number"]} was not merged to base branch.')
             else:
                 print("No link found")
         else:
@@ -97,5 +103,24 @@ def get_pull_request(issue: dict):
     else:
         print("Search phrase not found")
 
-    return pr_number
+    return pr_merge_sha
+
+def get_commit_details(owner: str, repo:str, ref: str):
     
+    url = f'https://api.github.com/repos/{owner}/{repo}/commits/{ref}'
+    response = call_github_api(url)
+
+    commit_details = {}
+    json_response = response.json()
+    commit_details['files_changed'] = len(json_response['files'])
+    file_details = []
+    for file in json_response['files']:
+        file_detail = {}
+        file_detail['filename'] = file['filename']
+        file_detail['patch'] = file['patch']
+        file_details.append(file_detail)
+
+    commit_details['file_details'] = file_details
+    pprint.pprint(commit_details)
+    
+    return None
