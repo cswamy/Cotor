@@ -1,4 +1,5 @@
 import utils
+import pprint
 
 repo_link = "https://github.com/gradio-app/gradio"
 # repo_link = "https://github.com/pydantic/FastUI"
@@ -15,4 +16,5 @@ issue = utils.get_issue(owner, repo, issue_number)
 if issue is not None:
     pr_merge_sha = utils.get_merge_commit(owner, repo, issue)
     if pr_merge_sha is not None:
-        utils.get_commit_details(owner, repo, pr_merge_sha)
+        commit_details = utils.get_commit_details(owner, repo, pr_merge_sha)
+        pprint.pprint(commit_details)
