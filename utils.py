@@ -8,6 +8,7 @@ from typing import List
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from bs4 import BeautifulSoup
 
+# function to call github api used across all functions
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def call_github_api(url: str):
     load_dotenv()
@@ -23,39 +24,18 @@ def call_github_api(url: str):
         print(f"Request failed for {url}")
     return response
 
-def get_all_closed_issues(owner: str, repo: str) -> List[dict]:
-    issues = []
-    url = f'https://api.github.com/repos/{owner}/{repo}/issues?state=closed'
-
-    while True:
-        if os.path.exists(f'issues/{repo}.json'):
-            break
-        else: 
-            response = call_github_api(url)
-
-        if response.status_code != 200:
-            print(f'[ERROR] Failed to fetch issues: {response.status_code} {response.reason} {response.text}')
-            break
-
-        # Filter out pull requests and add current batch of issues to the list
-        issues += [issue for issue in response.json() if 'pull_request' not in issue]
-
-        # Check if there is a next page, if not, break loop
-        if 'next' not in response.links:
-            break
-
-        # Update URL for next page
-        url = response.links['next']['url']
-    
-    # Write issues to json file
-    if os.path.exists(f'issues/{repo}.json'):
-        print(f'[INFO] File already exists: issues/{repo}.json')
-    else:
-        print(f"[INFO] Writing {len(issues)} issues to file...")
-        with open(f'issues/{repo}.json', 'w') as f:
-            json.dump(issues, f, indent=4)
-
-    return issues
+# helper function to call llm
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+def call_llm(payload: dict):
+    # url = "https://api.perplexity.ai/chat/completions"
+    url = "https://api.openai.com/v1/chat/completions"
+    load_dotenv()
+    headers = {
+        "content-type": "application/json",
+        "authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    return response
 
 def get_issue(owner: str, repo: str, issue_number: int) -> dict:
 
@@ -150,3 +130,22 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
     
     commit_details['file_details'] = file_details
     return commit_details
+
+def add_patch_explains(commit_details: dict) -> None:
+
+    for file in commit_details['file_details']:
+        payload = {
+            "model": "gpt-4-1106-preview",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "Be precise and concise. This is a patch from a github commit. Summarize what changed in the code."
+                },
+                {
+                    "role": "user",
+                    "content": file['raw_patch']
+                }],
+                "temperature": 0,
+        }
+        response = call_llm(payload)
+        file['patch_explains'] = response.json()['choices'][0]['message']['content']

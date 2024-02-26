@@ -1,5 +1,11 @@
 {'file_details': [{'changes': 5,
                    'filename': '.changeset/fine-lions-rescue.md',
+                   'patch_explains': 'The commit introduces a new feature to '
+                                     'the codebase, specifically adding '
+                                     'support for Polars dataframes within the '
+                                     'Gradio library. Additionally, a demo '
+                                     'showcasing this new functionality has '
+                                     'been included.',
                    'processed_patch': [{'context': 5, 'patch_start': 1}],
                    'raw_patch': '@@ -0,0 +1,5 @@\n'
                                 '+---\n'
@@ -12,6 +18,16 @@
                    'status': 'added'},
                   {'changes': 4,
                    'filename': 'demo/sort_records/polars_sort.csv',
+                   'patch_explains': 'This patch indicates the creation of a '
+                                     'new file or the addition of content to '
+                                     'an empty file. The content added '
+                                     'consists of four lines, which appear to '
+                                     'represent a simple comma-separated list '
+                                     '(CSV format) with two columns: Item and '
+                                     "Quantity. The items listed are 'apple' "
+                                     "with a quantity of 56, 'banana' with a "
+                                     "quantity of 12, and 'orange' with a "
+                                     'quantity of 30.',
                    'processed_patch': [{'context': 4, 'patch_start': 1}],
                    'raw_patch': '@@ -0,0 +1,4 @@\n'
                                 '+Item,Quantity\n'
@@ -22,6 +38,47 @@
                    'status': 'added'},
                   {'changes': 1,
                    'filename': 'demo/sort_records/run.ipynb',
+                   'patch_explains': 'This patch indicates the creation of a '
+                                     'new JSON file representing a Jupyter '
+                                     'notebook with the following contents:\n'
+                                     '\n'
+                                     '1. A markdown cell with a header titled '
+                                     '"Gradio Demo: sort_records".\n'
+                                     '2. A code cell to install the `gradio` '
+                                     'library using pip (with the `-q` flag '
+                                     'for quiet installation, suppressing '
+                                     'output).\n'
+                                     '3. A code cell to download a CSV file '
+                                     'named `polars_sort.csv` from the '
+                                     '`gradio` GitHub repository using the '
+                                     '`wget` command with the `-q` flag for '
+                                     'quiet operation.\n'
+                                     '4. A code cell that:\n'
+                                     '   - Imports the `gradio` library and '
+                                     'the `os` module.\n'
+                                     '   - Defines a function `sort_records` '
+                                     'that sorts records by the "Quantity" '
+                                     'column.\n'
+                                     '   - Creates a Gradio interface (`demo`) '
+                                     'for the `sort_records` function with the '
+                                     'following specifications:\n'
+                                     '     - Input is a `Dataframe` with '
+                                     'headers "Item" and "Quantity", data '
+                                     'types string and number respectively, 3 '
+                                     'rows, 2 fixed columns, and using the '
+                                     '"polars" type.\n'
+                                     '     - Output is a "dataframe".\n'
+                                     '     - The description of the interface '
+                                     'is "Sort by Quantity".\n'
+                                     '     - An example input is provided, '
+                                     'which is the path to the downloaded '
+                                     '`polars_sort.csv` file.\n'
+                                     '   - The interface is launched if the '
+                                     'script is run as the main program.\n'
+                                     '\n'
+                                     'The notebook is in the version 4 format '
+                                     'with a minor version of 5, and there is '
+                                     'no newline at the end of the file.',
                    'processed_patch': [{'context': 2, 'patch_start': 1}],
                    'raw_patch': '@@ -0,0 +1 @@\n'
                                 '+{"cells": [{"cell_type": "markdown", "id": '
@@ -67,6 +124,48 @@
                    'status': 'added'},
                   {'changes': 24,
                    'filename': 'demo/sort_records/run.py',
+                   'patch_explains': 'This patch introduces a new Python '
+                                     'script that uses the `gradio` library to '
+                                     'create a web interface for sorting '
+                                     'records by quantity. The key changes '
+                                     'are:\n'
+                                     '\n'
+                                     '1. Importing the `gradio` library and '
+                                     '`os` module.\n'
+                                     '2. Defining a function `sort_records` '
+                                     'that sorts a given `records` dataframe '
+                                     'by the "Quantity" column.\n'
+                                     '3. Creating a `gr.Interface` object '
+                                     'named `demo` with the following '
+                                     'configurations:\n'
+                                     '   - The `sort_records` function is set '
+                                     "as the interface's function to be "
+                                     'called.\n'
+                                     '   - The input component is a '
+                                     '`gr.Dataframe` with specified headers '
+                                     '("Item", "Quantity"), data types for the '
+                                     'columns (string and number), a fixed '
+                                     'number of rows (3), and a fixed number '
+                                     'of columns (2). The dataframe type is '
+                                     'set to "polars".\n'
+                                     '   - The output component is specified '
+                                     'as "dataframe".\n'
+                                     '   - A description "Sort by Quantity" is '
+                                     'provided for the interface.\n'
+                                     '   - An example input is included, which '
+                                     'is a CSV file named "polars_sort.csv" '
+                                     'located in the same directory as the '
+                                     'script.\n'
+                                     '4. The script is made executable by '
+                                     'adding a conditional `if __name__ == '
+                                     '"__main__":` block that launches the '
+                                     '`demo` interface when the script is run '
+                                     'directly.\n'
+                                     '\n'
+                                     'The patch does not include a newline at '
+                                     'the end of the file, which is a common '
+                                     'convention in text files but not '
+                                     'necessarily an issue.',
                    'processed_patch': [{'context': 25, 'patch_start': 1}],
                    'raw_patch': '@@ -0,0 +1,24 @@\n'
                                 '+import gradio as gr\n'
@@ -100,6 +199,11 @@
                    'status': 'added'},
                   {'changes': 1,
                    'filename': 'gradio/cli/commands/components/docs.py',
+                   'patch_explains': 'In the code, the import statement for '
+                                     '`rich` has been removed, specifically '
+                                     'the import of `print` from the `rich` '
+                                     'module. All other lines remain '
+                                     'unchanged.',
                    'processed_patch': [{'context': 6, 'patch_start': 6}],
                    'raw_patch': '@@ -6,7 +6,6 @@\n'
                                 ' \n'
@@ -113,6 +217,52 @@
                    'status': 'modified'},
                   {'changes': 68,
                    'filename': 'gradio/components/dataframe.py',
+                   'patch_explains': 'The code changes include:\n'
+                                     '\n'
+                                     '1. Expanded the `typing` imports to '
+                                     'include `TYPE_CHECKING`, `Tuple`, and '
+                                     '`Union`.\n'
+                                     '2. Added conditional imports and utility '
+                                     'functions for the `polars` library, '
+                                     'which is used for data manipulation '
+                                     'similar to `pandas`.\n'
+                                     '3. Updated the `DataframeData` class to '
+                                     'allow its `data` attribute to be either '
+                                     'a list of lists or a list of tuples.\n'
+                                     "4. Modified the `Dataframe` component's "
+                                     'docstring to include `polars.DataFrame` '
+                                     'as an accepted type for both '
+                                     'preprocessing and postprocessing.\n'
+                                     '5. Added a new demo called '
+                                     '`sort_records` in the `Dataframe` '
+                                     "component's docstring.\n"
+                                     '6. Extended the `__init__` method of the '
+                                     '`Dataframe` component to accept '
+                                     '`pl.DataFrame` as a possible type for '
+                                     'the `value` parameter.\n'
+                                     '7. Added a new type option `"polars"` to '
+                                     'the `type` parameter of the `Dataframe` '
+                                     'component, and included a check to raise '
+                                     'an `ImportError` if `polars` is not '
+                                     'installed when it is selected.\n'
+                                     '8. Updated the `preprocess` method to '
+                                     'handle the new `"polars"` type, '
+                                     'converting the input `payload` to a '
+                                     '`polars.DataFrame`.\n'
+                                     '9. Updated the `postprocess` method to '
+                                     'handle `polars.DataFrame` as an input, '
+                                     'converting it to the `DataframeData` '
+                                     'format.\n'
+                                     '10. Added handling for `pl.DataFrame` in '
+                                     'the `process_example` method.\n'
+                                     '\n'
+                                     'Overall, these changes integrate support '
+                                     'for the `polars` library in the '
+                                     '`Dataframe` component, allowing users to '
+                                     'work with `polars.DataFrame` objects in '
+                                     'addition to the previously supported '
+                                     '`pandas.DataFrame`, `numpy.array`, and '
+                                     'list of lists.',
                    'processed_patch': [{'context': 17, 'patch_start': 3},
                                        {'context': 26, 'patch_start': 25},
                                        {'context': 10, 'patch_start': 55},
@@ -409,6 +559,9 @@
                    'status': 'modified'},
                   {'changes': 1,
                    'filename': 'test/requirements.in',
+                   'patch_explains': 'In this commit, the `polars` library '
+                                     'with version `0.20.5` was added to the '
+                                     'list of dependencies.',
                    'processed_patch': [{'context': 7, 'patch_start': 8}],
                    'raw_patch': '@@ -8,6 +8,7 @@ fastapi>=0.101.0\n'
                                 ' gradio_pdf==0.0.3\n'
@@ -422,6 +575,17 @@
                    'status': 'modified'},
                   {'changes': 2,
                    'filename': 'test/requirements.txt',
+                   'patch_explains': 'The code change adds a new Python '
+                                     'package dependency named `polars` with '
+                                     'version `0.20.5` to a requirements file, '
+                                     'which is typically used for managing '
+                                     'project dependencies. The comment `# via '
+                                     '-r requirements.in` suggests that this '
+                                     'dependency was added through a '
+                                     'requirements input file, possibly '
+                                     'indicating that the addition was part of '
+                                     'a larger dependency management process '
+                                     'or update.',
                    'processed_patch': [{'context': 8, 'patch_start': 130}],
                    'raw_patch': '@@ -130,6 +130,8 @@ prompt-toolkit==3.0.30\n'
                                 '     # via ipython\n'
