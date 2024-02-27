@@ -2,3 +2,4 @@ pandas
 tenacity
 requests
 beautifulsoup4
+supabase

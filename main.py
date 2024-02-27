@@ -19,5 +19,5 @@ if issue is not None:
     if pr_merge_sha is not None:
         commit_details = utils.get_commit_details(owner, repo, pr_merge_sha)
         if len(commit_details['file_details']) == commit_details['files_changed']:
-            utils.add_patch_explains(commit_details)
+            utils.add_patch_explains(commit_details, issue)
             pprint.pprint(commit_details)

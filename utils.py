@@ -131,7 +131,13 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
     commit_details['file_details'] = file_details
     return commit_details
 
-def add_patch_explains(commit_details: dict) -> None:
+def add_patch_explains(commit_details: dict, issue: dict) -> None:
+
+    with open('./llm_prompts/patch_explain.txt', 'r') as f:
+        patch_prompt_str = f.read()
+        patch_prompt_str = patch_prompt_str + issue['title'] + "\n" + issue['body']
+
+    print(f"[INFO] Patch prompt str: {patch_prompt_str}")
 
     for file in commit_details['file_details']:
         payload = {
@@ -139,7 +145,7 @@ def add_patch_explains(commit_details: dict) -> None:
             "messages": [
                 {
                     "role": "system",
-                    "content": "Be precise and concise. This is a patch from a github commit. Summarize what changed in the code."
+                    "content": patch_prompt_str
                 },
                 {
                     "role": "user",
