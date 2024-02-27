@@ -5,13 +5,13 @@ import utils
 import pprint
 
 # repo_link = "https://github.com/gradio-app/gradio"
-# repo_link = "https://github.com/pydantic/FastUI"
+repo_link = "https://github.com/pydantic/FastUI"
 # repo_link = "https://github.com/cswamy/edgar"
 owner = repo_link.split('/')[3]
 repo = repo_link.split('/')[4]
 
 # issue_number = 6973
-# issue_number = 148
+issue_number = 148
 # issue_number = 8
 
 issue_details = {}
@@ -23,7 +23,8 @@ issue_details["updated_at"] = datetime.datetime.now().isoformat()
 
 if issue_number:
     issue = utils.get_issue(owner, repo, issue_number)
-    issue_details["issue_description"] = issue['title'] + "\n" + issue['body']
+    issue_details["issue_title"] = issue['title'] 
+    issue_details["issue_body"] = issue['body']
 
 if issue is not None:
     merged_commit = utils.get_merged_commit(owner, repo, issue)
