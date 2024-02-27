@@ -1,4 +1,3 @@
-pandas
 tenacity
 requests
 beautifulsoup4
