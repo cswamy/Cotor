@@ -2,9 +2,10 @@ import requests
 import os
 import pprint
 import json
+import supabase
 
 from dotenv import load_dotenv
-from typing import List
+from typing import List, Tuple
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from bs4 import BeautifulSoup
 
@@ -52,7 +53,7 @@ def get_issue(owner: str, repo: str, issue_number: int) -> dict:
 
     return response.json()
 
-def get_merge_commit(owner: str, repo: str, issue: dict) -> str:
+def get_merged_commit(owner: str, repo: str, issue: dict) -> Tuple[str, str]:
 
     html_url = issue['html_url']
     html = call_github_api(html_url).text
@@ -62,7 +63,10 @@ def get_merge_commit(owner: str, repo: str, issue: dict) -> str:
     search_phrase = "Successfully merging a pull request may close this issue."
     search_element = soup.find(text=search_phrase)
 
-    pr_merge_sha = None
+    merged_commit = {
+        'pr_number': None,
+        'pr_merge_sha': None,
+    }
     if search_element:
         next_div = search_element.find_next('div')
         if next_div:
@@ -73,7 +77,8 @@ def get_merge_commit(owner: str, repo: str, issue: dict) -> str:
                     url = f'https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}'
                     pr_details = call_github_api(url)
                     if pr_details.json()['merged'] == True:
-                        pr_merge_sha = pr_details.json()['merge_commit_sha']
+                        merged_commit['pr_number'] = pr_number
+                        merged_commit['pr_merge_sha'] = pr_details.json()['merge_commit_sha']
                     else:
                         print(f'[INFO] Pull request {pr_number} for issue {issue["number"]} was not merged to base branch.')
             else:
@@ -83,7 +88,7 @@ def get_merge_commit(owner: str, repo: str, issue: dict) -> str:
     else:
         print("Search phrase not found")
 
-    return pr_merge_sha
+    return merged_commit
 
 def get_commit_details(owner: str, repo:str, ref: str) -> dict:
 
@@ -137,8 +142,6 @@ def add_patch_explains(commit_details: dict, issue: dict) -> None:
         patch_prompt_str = f.read()
         patch_prompt_str = patch_prompt_str + issue['title'] + "\n" + issue['body']
 
-    print(f"[INFO] Patch prompt str: {patch_prompt_str}")
-
     for file in commit_details['file_details']:
         payload = {
             "model": "gpt-4-1106-preview",
@@ -155,3 +158,16 @@ def add_patch_explains(commit_details: dict, issue: dict) -> None:
         }
         response = call_llm(payload)
         file['patch_explains'] = response.json()['choices'][0]['message']['content']
+
+def upload_supabase(data_dict: dict) -> None:
+    
+    load_dotenv()
+    supabase_url = os.getenv('SUPABASE_URL')
+    supabase_key = os.getenv('SUPABASE_KEY')
+    supabase_table = os.getenv('SUPABASE_TABLE')
+    supabase_client = supabase.create_client(supabase_url, supabase_key)
+
+    try:
+        response = supabase_client.table(supabase_table).upsert(data_dict).execute()
+    except Exception as e:
+        print(f"[ERROR] Uploading to Supabase: {e}")
