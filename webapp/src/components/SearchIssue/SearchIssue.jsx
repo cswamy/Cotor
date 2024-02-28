@@ -8,6 +8,7 @@ import {
     TextField,
     useTheme,
     useMediaQuery,
+    Button,
 } from '@mui/material';
 
 // Import custom components
@@ -17,6 +18,11 @@ const SearchIssue = () => {
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+    // Search button logic
+    const searchClicked = () => {
+        console.log('Search clicked');
+    };
 
     return (
         <Box>
@@ -49,7 +55,8 @@ const SearchIssue = () => {
                             sx={{mb: 1}}>
                             Paste link to a public GitHub repository
                             </Typography>
-                            <TextField 
+                            <TextField
+                            size='small' 
                             fullWidth
                             placeholder="https://github.com/gradio-app/gradio"
                             inputProps={{
@@ -91,6 +98,7 @@ const SearchIssue = () => {
                             Enter an issue number
                             </Typography>
                             <TextField 
+                            size='small'
                             fullWidth
                             placeholder="6973"
                             inputProps={{
@@ -118,6 +126,32 @@ const SearchIssue = () => {
                             />
                         </Box>
                     </Grid>
+
+                    <Grid item xs={12}>
+                        <Box 
+                        margin="auto"
+                        sx={{mt: 3, display: 'flex', justifyContent: 'center'}}
+                        >   
+                            <Button
+                            sx={{
+                                backgroundColor: 'white',
+                                color: 'black',
+                                border: '1px solid #dadada',
+                                borderRadius: '25px',
+                                '&:hover': {
+                                    backgroundColor: 'black',
+                                    color: 'white',
+                                },
+                                textTransform: 'none',
+                                width: isSmallScreen ? '30%' : '10%',
+                            }}
+                            onClick={searchClicked}
+                            >
+                                Search
+                            </Button>
+                        </Box>
+                    </Grid>
+
                 </Grid>
             </Box>
         </Box>
