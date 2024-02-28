@@ -1,4 +1,4 @@
-import { React } from 'react';
+import { React, useState } from 'react';
 import { supabase } from '../../supabaseClient';
 
 // Import mui components
@@ -6,23 +6,44 @@ import {
     Box,
     Button,
     Typography,
+    CircularProgress,
 } from '@mui/material';
 
-// Signin button click
-const handleGitHubSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ 
-        provider: 'github',
-        options: {
-            redirectTo: 'http://localhost:3000/search',
-        },
-    });
-    if (error) {
-        console.log('GitHub signin error: ', error);
-    }
-};
-
 const HomePage = () => {
+
+    // State variables
+    const [loading, setLoading] = useState(false);
+
+    // GitHub signin button click
+    const handleGitHubSignIn = async () => {
+        setLoading(true);
+        const { error } = await supabase.auth.signInWithOAuth({ 
+            provider: 'github',
+            options: {
+                redirectTo: 'http://localhost:3000/search',
+            },
+        });
+        if (error) {
+            console.log('GitHub signin error: ', error);
+        } else {
+            setLoading(false);
+        }
+    };
+
+    // Return component
     return (
+        loading ?
+        <Box
+        sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            mt: 10,
+          }}>
+            <CircularProgress sx={{color: 'black'}}/>
+        </Box>
+        :
         <Box
         sx={{
             display: 'flex',

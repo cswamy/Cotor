@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
         const session = supabase.auth.getSession();
         setUser(session?.user ?? null);
 
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user || null);
             }
         );

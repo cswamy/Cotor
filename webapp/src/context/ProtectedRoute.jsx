@@ -1,14 +1,14 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
+
+import HomePage from '../components/HomePage/HomePage';
 
 const ProtectedRoute = ({ children }) => {
     const { user } = useAuth(); 
 
     if (!user) {
       // User not authenticated, redirect to home page
-      // return <Navigate to="/" replace />;
-      console.log('User not authenticated, redirect to home page')
+      return <HomePage />;
     }
   
     return children;
