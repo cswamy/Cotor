@@ -5,9 +5,14 @@ import {
     Box,
     Button,
     Typography,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
 
 const HeaderMenu = (props) => {
+
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
     const sourcePage = props.page;
     let button1Text = '';
@@ -37,17 +42,25 @@ const HeaderMenu = (props) => {
     return (
         <Box
         sx={{
-            mr: 2,
+            position: 'fixed',
+            right: isSmallScreen ? 0 : 8,
+            top: isSmallScreen ? 'auto' : 2,
+            bottom: isSmallScreen ? 8 : 'auto',
+            left: isSmallScreen ? 0 : 'auto',
+            width: isSmallScreen ? '100vw' : 'auto',
+            maxWidth: isSmallScreen ? '100%' : 'auto',
+            margin: isSmallScreen ? 'auto' : 'auto',
+            textAlign: isSmallScreen ? 'center' : 'right',
         }}>
             <Button
             sx={{
                 color: 'black',
                 textTransform: 'none',
-                borderBottom: '0.5px solid black',
+                borderBottom: isSmallScreen ? 'none' : '0.5px solid black',
                 borderRadius: 0,
                 mr: 2,
                 '&:hover': {
-                    borderBottom: '1px solid black',
+                    borderBottom: isSmallScreen ? 'none' : '1px solid black',
                 },
             }}
             onClick={button1Clicked}
@@ -60,10 +73,10 @@ const HeaderMenu = (props) => {
             sx={{
                 color: 'black',
                 textTransform: 'none',
-                borderBottom: '0.5px solid black',
+                borderBottom: isSmallScreen ? 'none' : '0.5px solid black',
                 borderRadius: 0,
                 '&:hover': {
-                    borderBottom: '1px solid black',
+                    borderBottom: isSmallScreen ? 'none' : '1px solid black',
                 },
             }}
             onClick={button2Clicked}
