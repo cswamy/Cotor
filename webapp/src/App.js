@@ -1,25 +1,32 @@
 import { React } from 'react';
 
 // Import networking
-import { Routes, Route } from 'react-router-dom';
-
-// Import mui components
-import {
-	Box,
-} from '@mui/material';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './context/AuthProvider';
+import ProtectedRoute from './context/ProtectedRoute';
 
 // Import custom components
 import HomePage from './components/HomePage/HomePage';
+import SearchIssue from './components/SearchIssue/SearchIssue';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 
 const App = () => {
   return (
-    <Box>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Box>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search" 
+          element={
+            <ProtectedRoute>
+              <SearchIssue />
+            </ProtectedRoute>
+            } 
+          />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 
