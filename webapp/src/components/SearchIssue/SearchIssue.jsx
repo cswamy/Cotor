@@ -1,4 +1,4 @@
-import { React } from 'react';
+import { React, useState, useEffect } from 'react';
 
 // Import mui components
 import {
@@ -9,6 +9,8 @@ import {
     useTheme,
     useMediaQuery,
     Button,
+    Alert,
+    Collapse,
 } from '@mui/material';
 
 // Import custom components
@@ -19,15 +21,52 @@ const SearchIssue = () => {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // Search button logic
-    const searchClicked = () => {
-        console.log('Search clicked');
+    // Input and search button logic
+    const [ghLink, setGhLink] = useState('');
+    const [issueNumber, setIssueNumber] = useState('');
+    const [emptyFieldsAlert, setEmptyFieldsAlert] = useState(false);
+
+    const handleGHLinkChange = (event) => {
+        setGhLink(event.target.value);
     };
+
+    const handleissueNumberChange = (event) => {
+        setIssueNumber(event.target.value);
+    };
+
+    const searchClicked = () => {
+        if (ghLink === '' || issueNumber === '') {
+            setEmptyFieldsAlert(true);
+        } else {
+            console.log('GH link: ', ghLink);
+            console.log('Issue number: ', issueNumber);
+        }
+    };
+
+    useEffect(() => {
+        if (emptyFieldsAlert) {
+          const timer = setTimeout(() => {
+            setEmptyFieldsAlert(false);
+          }, 2000);
+      
+          return () => {
+            clearTimeout(timer);
+          };
+        }
+      }, [emptyFieldsAlert]);
 
     return (
         <Box>
             <Box>
+                <Collapse in={emptyFieldsAlert} transition='auto' easing='ease-out'>
+                    <Alert severity='error'>
+                        Please enter a valid GitHub link and an issue number
+                    </Alert>   
+                </Collapse>
+
+                {!emptyFieldsAlert &&
                 <HeaderMenu page='search'/>
+                }
             </Box>
             <Box
             sx={{
@@ -58,7 +97,9 @@ const SearchIssue = () => {
                             <TextField
                             size='small' 
                             fullWidth
-                            placeholder="https://github.com/gradio-app/gradio"
+                            placeholder='https://github.com/gradio-app/gradio'
+                            value={ghLink}
+                            onChange={handleGHLinkChange}
                             inputProps={{
                                 style: {
                                     fontSize: isSmallScreen ? "0.8rem" : "1rem", 
@@ -100,7 +141,9 @@ const SearchIssue = () => {
                             <TextField 
                             size='small'
                             fullWidth
-                            placeholder="6973"
+                            placeholder='6973'
+                            value={issueNumber}
+                            onChange={handleissueNumberChange}
                             inputProps={{
                                 style: {
                                     fontSize: isSmallScreen ? "0.8rem" : "1rem", 
@@ -134,7 +177,7 @@ const SearchIssue = () => {
                         >   
                             <Button
                             sx={{
-                                backgroundColor: 'white',
+                                backgroundColor: '#dadada',
                                 color: 'black',
                                 border: '1px solid #dadada',
                                 borderRadius: '25px',
