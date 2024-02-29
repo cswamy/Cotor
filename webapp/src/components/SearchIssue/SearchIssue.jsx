@@ -16,6 +16,9 @@ import {
 // Import custom components
 import HeaderMenu from '../HeaderMenu/HeaderMenu';
 
+// Import networking and DB
+import axios from 'axios';
+
 const SearchIssue = () => {
 
     const theme = useTheme();
@@ -24,7 +27,8 @@ const SearchIssue = () => {
     // Input and search button logic
     const [ghLink, setGhLink] = useState('');
     const [issueNumber, setIssueNumber] = useState('');
-    const [emptyFieldsAlert, setEmptyFieldsAlert] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
 
     const handleGHLinkChange = (event) => {
         setGhLink(event.target.value);
@@ -34,37 +38,69 @@ const SearchIssue = () => {
         setIssueNumber(event.target.value);
     };
 
-    const searchClicked = () => {
+    const searchClicked = async () => {
+        console.log('ghLink: ', ghLink);
+        console.log('issueNumber: ', issueNumber);
         if (ghLink === '' || issueNumber === '') {
-            setEmptyFieldsAlert(true);
+            setAlertMessage('Please enter a GitHub link and an issue number');
+            setShowAlert(true);
         } else {
-            console.log('GH link: ', ghLink);
-            console.log('Issue number: ', issueNumber);
+            let owner = ghLink.split('/')[3];
+            let repo = ghLink.split('/')[4];
+            if (!owner || !repo || isNaN(Number(issueNumber))) {
+                setAlertMessage('Please enter a valid GitHub link and issue number');
+                setShowAlert(true);
+            } else {
+                let url = 
+                'http://127.0.0.1:8000/validateinputs/' + owner + '/' + repo;
+                const response = await axios.request({
+                    method: 'GET',
+                    url: url,
+                    params: {
+                        issue: issueNumber,
+                    },
+                });
+                if (response.data.repo_exists === false) {
+                    setAlertMessage('Could not find repository. Please check and try again.')
+                    setShowAlert(true);
+                } else if (response.data.issue_exists === false) {
+                    if (response.data.issue_status === 'open') {
+                        setAlertMessage('Issue is still open. Please try again with a closed issue.')
+                        setShowAlert(true);
+                    } else {
+                        setAlertMessage('Could not find issue. Please check and try again.')
+                        setShowAlert(true);
+                    }
+                } else {
+                    console.log("Valid inputs!!")
+                }
+            }
         }
     };
 
     useEffect(() => {
-        if (emptyFieldsAlert) {
+        if (setShowAlert) {
           const timer = setTimeout(() => {
-            setEmptyFieldsAlert(false);
+            setShowAlert(false);
+            setAlertMessage('');
           }, 2000);
       
           return () => {
             clearTimeout(timer);
           };
         }
-      }, [emptyFieldsAlert]);
+      }, [showAlert]);
 
     return (
         <Box>
             <Box>
-                <Collapse in={emptyFieldsAlert} transition='auto' easing='ease-out'>
+                <Collapse in={showAlert} transition='auto' easing='ease-out'>
                     <Alert severity='error'>
-                        Please enter a valid GitHub link and an issue number
+                        {alertMessage}
                     </Alert>   
                 </Collapse>
 
-                {!emptyFieldsAlert &&
+                {!showAlert &&
                 <HeaderMenu page='search'/>
                 }
             </Box>
@@ -128,7 +164,7 @@ const SearchIssue = () => {
 
                     <Grid item xs={12}>
                         <Box 
-                        width={isSmallScreen ? '40%' : '20%'} 
+                        width={isSmallScreen ? '50%' : '30%'} 
                         margin="auto"
                         sx={{mt: 4}}
                         >   
@@ -136,7 +172,7 @@ const SearchIssue = () => {
                             variant={isSmallScreen ? 'body1' : 'h6'} 
                             align="center"
                             sx={{mb: 1}}>
-                            Enter an issue number
+                            Enter a closed issue number
                             </Typography>
                             <TextField 
                             size='small'
