@@ -17,7 +17,7 @@ def call_github_api(url: str):
     header = {
         'Authorization': f'Bearer {token}',
         'Accept': 'application/vnd.github+json',
-        'User-Agent': 'cotor.ai',
+        'User-Agent': 'cotorai.com',
     }
     try:
         response = requests.get(url, headers=header)

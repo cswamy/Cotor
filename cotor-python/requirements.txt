@@ -2,5 +2,3 @@ tenacity
 requests
 beautifulsoup4
 supabase
-fastapi
-uvicorn
