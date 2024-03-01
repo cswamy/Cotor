@@ -79,6 +79,9 @@ const SearchIssue = () => {
                                 'owner': owner,
                                 'repo': repo,
                                 'issue': issueNumber,
+                                'issue_url': response.data.issue_url,
+                                'issue_title': response.data.issue_title,
+                                'issue_body': response.data.issue_body,
                             }
                         }
                     );

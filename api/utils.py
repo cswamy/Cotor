@@ -19,44 +19,32 @@ def call_github_api(url: str):
         'Accept': 'application/vnd.github+json',
         'User-Agent': 'cotorai.com',
     }
+    response = None
     try:
         response = requests.get(url, headers=header)
     except: 
-        print(f"Request failed for {url}")
+        print(f"Github request failed for {url}")
     return response
 
 # helper function to call llm
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def call_llm(payload: dict):
-    # url = "https://api.perplexity.ai/chat/completions"
     url = "https://api.openai.com/v1/chat/completions"
     load_dotenv()
     headers = {
         "content-type": "application/json",
         "authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
     }
-    response = requests.post(url, json=payload, headers=headers)
+    response = None
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+    except:
+        print(f"LLM request failed for {url}")
     return response
 
-def get_issue(owner: str, repo: str, issue_number: int) -> dict:
+def get_merged_commit(owner: str, repo: str, issue_url: str) -> dict:
 
-    url = f'https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}'
-    response = call_github_api(url)
-
-    if 'pull_request' in response.json():
-        print(f'[INFO] {issue_number} is a pull request. Please search for a closed issue.')
-        return None
-
-    if response.json()['state'] == 'open':
-        print(f'[INFO] {issue_number} is still open. Please search for a closed issue.')
-        return None
-
-    return response.json()
-
-def get_merged_commit(owner: str, repo: str, issue: dict) -> Tuple[str, str]:
-
-    html_url = issue['html_url']
-    html = call_github_api(html_url).text
+    html = call_github_api(issue_url).text
     
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -79,14 +67,6 @@ def get_merged_commit(owner: str, repo: str, issue: dict) -> Tuple[str, str]:
                     if pr_details.json()['merged'] == True:
                         merged_commit['pr_number'] = pr_number
                         merged_commit['pr_merge_sha'] = pr_details.json()['merge_commit_sha']
-                    else:
-                        print(f'[INFO] Pull request {pr_number} for issue {issue["number"]} was not merged to base branch.')
-            else:
-                print("No link found")
-        else:
-            print("No next div found")
-    else:
-        print("Search phrase not found")
 
     return merged_commit
 
@@ -136,11 +116,11 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
     commit_details['file_details'] = file_details
     return commit_details
 
-def add_patch_explains(commit_details: dict, issue: dict) -> None:
+def add_patch_explains(commit_details: dict, issue_title: str, issue_body: str) -> None:
 
     with open('./llm_prompts/patch_explain.txt', 'r') as f:
         patch_prompt_str = f.read()
-        patch_prompt_str = patch_prompt_str + issue['title'] + "\n" + issue['body']
+        patch_prompt_str = patch_prompt_str + issue_title + "\n" + issue_body
 
     for file in commit_details['file_details']:
         payload = {
@@ -157,17 +137,7 @@ def add_patch_explains(commit_details: dict, issue: dict) -> None:
                 "temperature": 0,
         }
         response = call_llm(payload)
-        file['patch_explains'] = response.json()['choices'][0]['message']['content']
-
-def upload_supabase(data_dict: dict) -> None:
-    
-    load_dotenv()
-    supabase_url = os.getenv('SUPABASE_URL')
-    supabase_key = os.getenv('SUPABASE_KEY')
-    supabase_table = os.getenv('SUPABASE_TABLE')
-    supabase_client = supabase.create_client(supabase_url, supabase_key)
-
-    try:
-        response = supabase_client.table(supabase_table).upsert(data_dict).execute()
-    except Exception as e:
-        print(f"[ERROR] Uploading to Supabase: {e}")
+        if response is not None:
+            file['patch_explains'] = response.json()['choices'][0]['message']['content']
+        else:
+            file['patch_explains'] = "Empty"
