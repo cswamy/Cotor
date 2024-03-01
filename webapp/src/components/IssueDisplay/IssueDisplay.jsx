@@ -3,6 +3,8 @@ import { React, useState, useEffect } from 'react';
 // Import mui components
 import {
   Box,
+  Typography,
+  Divider,
 } from '@mui/material';
 
 // Import networking and dB
@@ -84,8 +86,20 @@ const IssueDisplay = () => {
                 <HeaderMenu page='issue'/>
             </Box>
 
-            <Box>
-                <p>{issueData['merged_pr_id']}</p>
+            <Box sx={{mt:10, ml: 4, mr: 6}}>
+                <Typography variant='subtitle1'>
+                    <b>Repository</b>: {issueData['repo'] + ' '}
+                </Typography>
+                <Typography variant='subtitle1'>
+                    <b>Issue</b>: {issueData['issue_id']}
+                </Typography>
+                <Typography variant='subtitle1'>
+                    <b>Title</b>: {issueData['issue_title'].replace(/`/g, '')}
+                </Typography>
+                <Typography variant='subtitle1'>
+                    <b>Merged PR</b>: {issueData['merged_pr_id']}
+                </Typography>
+                <Divider sx= {{mt:1}}/>
             </Box>
         </Box>
     );
