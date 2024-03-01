@@ -16,13 +16,15 @@ import {
 // Import custom components
 import HeaderMenu from '../HeaderMenu/HeaderMenu';
 
-// Import networking and DB
+// Import networking
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const SearchIssue = () => {
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const navigate = useNavigate();
 
     // Input and search button logic
     const [ghLink, setGhLink] = useState('');
@@ -39,15 +41,15 @@ const SearchIssue = () => {
     };
 
     const searchClicked = async () => {
-        console.log('ghLink: ', ghLink);
-        console.log('issueNumber: ', issueNumber);
         if (ghLink === '' || issueNumber === '') {
             setAlertMessage('Please enter a GitHub link and an issue number');
             setShowAlert(true);
         } else {
+            ghLink.trim();
+            let domain = ghLink.split('/')[2];
             let owner = ghLink.split('/')[3];
             let repo = ghLink.split('/')[4];
-            if (!owner || !repo || isNaN(Number(issueNumber))) {
+            if (!owner || !repo || domain !== 'github.com' || isNaN(Number(issueNumber))) {
                 setAlertMessage('Please enter a valid GitHub link and issue number');
                 setShowAlert(true);
             } else {
@@ -64,15 +66,13 @@ const SearchIssue = () => {
                     setAlertMessage('Could not find repository. Please check and try again.')
                     setShowAlert(true);
                 } else if (response.data.issue_exists === false) {
-                    if (response.data.issue_status === 'open') {
-                        setAlertMessage('Issue is still open. Please try again with a closed issue.')
-                        setShowAlert(true);
-                    } else {
-                        setAlertMessage('Could not find issue. Please check and try again.')
-                        setShowAlert(true);
-                    }
+                    setAlertMessage('Could not find issue. Please check and try again.')
+                    setShowAlert(true);
+                } else if (response.data.issue_status === 'open') {
+                    setAlertMessage('Issue is still open. Please try again with a closed issue.')
+                    setShowAlert(true);
                 } else {
-                    console.log("Valid inputs!!")
+                    navigate('/issue');
                 }
             }
         }

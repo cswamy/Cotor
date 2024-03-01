@@ -14,6 +14,7 @@ import {
 // Import custom components
 import HomePage from './components/HomePage/HomePage';
 import SearchIssue from './components/SearchIssue/SearchIssue';
+import IssueDisplay from './components/IssueDisplay/IssueDisplay';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 
 // Create theme
@@ -37,6 +38,14 @@ const App = () => {
               </ProtectedRoute>
               } 
             />
+            <Route path="/issue" 
+            element={
+              <ProtectedRoute>
+                <IssueDisplay />
+              </ProtectedRoute>
+              } 
+            />
+            
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </AuthProvider>

@@ -31,9 +31,13 @@ def validate_inputs(owner: str, repo: str, issue: int) -> dict:
     
     if repo_response.status_code == 200:
         response['repo_exists'] = True
-    if issue_response.status_code == 200 and issue_response.json()['state'] == 'closed':
-        response['issue_exists'] = True
-        response['issue_status'] = 'closed'
+    if issue_response.status_code == 200:
+        if issue_response.json()['state'] == 'closed':
+            response['issue_exists'] = True
+            response['issue_status'] = 'closed'
+        else:
+            response['issue_exists'] = True
+            response['issue_status'] = 'open'
     
     return response
 
