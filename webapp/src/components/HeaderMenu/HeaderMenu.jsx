@@ -17,12 +17,14 @@ const HeaderMenu = (props) => {
     const sourcePage = props.page;
     let button1Text = '';
     let button2Text = '';
+    let button3Text = '';
     if (sourcePage === 'search') {
         button1Text = 'History';
         button2Text = 'Logout';
     } else if (sourcePage === 'issue') {
         button1Text = 'Search';
-        button2Text = 'Logout';
+        button2Text = 'History';
+        button3Text = 'Logout';
     } else if (sourcePage === 'history') {
         button1Text = 'Search';
         button2Text = 'Logout';
@@ -37,6 +39,10 @@ const HeaderMenu = (props) => {
 
     const button2Clicked = () => {
         console.log('Clicked: ', button2Text);
+    };
+
+    const button3Clicked = () => {
+        console.log('Clicked: ', button3Text);
     };
 
     return (
@@ -58,7 +64,6 @@ const HeaderMenu = (props) => {
                 textTransform: 'none',
                 borderBottom: isSmallScreen ? 'none' : '0.5px solid black',
                 borderRadius: 0,
-                mr: 2,
                 '&:hover': {
                     borderBottom: isSmallScreen ? 'none' : '1px solid black',
                 },
@@ -75,6 +80,7 @@ const HeaderMenu = (props) => {
                 textTransform: 'none',
                 borderBottom: isSmallScreen ? 'none' : '0.5px solid black',
                 borderRadius: 0,
+                ml: 2,
                 '&:hover': {
                     borderBottom: isSmallScreen ? 'none' : '1px solid black',
                 },
@@ -85,6 +91,25 @@ const HeaderMenu = (props) => {
                     {button2Text}
                 </Typography>
             </Button>
+            {sourcePage !== 'search' &&
+            <Button
+            sx={{
+                color: 'black',
+                textTransform: 'none',
+                borderBottom: isSmallScreen ? 'none' : '0.5px solid black',
+                borderRadius: 0,
+                ml: 2,
+                '&:hover': {
+                    borderBottom: isSmallScreen ? 'none' : '1px solid black',
+                },
+            }}
+            onClick={button3Clicked}
+            >
+                <Typography variant="subtitle2">
+                    {button3Text}
+                </Typography>
+            </Button>
+            }
         </Box>
     )
 };

@@ -72,7 +72,16 @@ const SearchIssue = () => {
                     setAlertMessage('Issue is still open. Please try again with a closed issue.')
                     setShowAlert(true);
                 } else {
-                    navigate('/issue');
+                    navigate(
+                        '/issue',
+                        {
+                            'state': {
+                                'owner': owner,
+                                'repo': repo,
+                                'issue': issueNumber,
+                            }
+                        }
+                    );
                 }
             }
         }
