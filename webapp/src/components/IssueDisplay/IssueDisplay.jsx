@@ -104,7 +104,6 @@ const IssueDisplay = () => {
     useEffect(() => {
         if (Object.keys(issueData).length > 0) {
             setDataLoading(false);
-            console.log(issueData);
         }
     }, [issueData]);
 
@@ -214,18 +213,22 @@ const IssueDisplay = () => {
                             <Typography variant={typoVariant} sx={{mb: 2, px: 2, py: 1, backgroundColor: '#f6f6f6'}}>
                                 <b>File: </b>{file['filename']}
                             </Typography>
-                            <Grid container sx={{ px: 2}}>
+                            <Grid container sx={{ px: 2}} spacing={2}>
                                 <Grid item xs={12} sm={6}>
                                     <Box>
-
+                                        <Typography variant={typoVariant} sx={{mb: 2}}>
+                                            {file['patch_explains']}
+                                        </Typography>
                                     </Box>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography variant={typoVariant} sx={{mb: 2}}>
-                                        <b>Type of change: </b>{file['status']}
-                                    </Typography>
-                                </Grid>
 
+                                <Grid item xs={12} sm={6}>
+                                    <Box sx={{maxWidth: '100%'}}>
+                                        <pre>
+                                            <code>{file['raw_code']}</code>
+                                        </pre>
+                                    </Box>
+                                </Grid>
                             </Grid> 
                         </Paper>
                     ))}

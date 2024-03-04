@@ -17,7 +17,7 @@ def call_github_api(url: str):
     header = {
         'Authorization': f'Bearer {token}',
         'Accept': 'application/vnd.github+json',
-        'User-Agent': 'cotorai.com',
+        'User-Agent': 'cotor.dev',
     }
     try:
         response = requests.get(url, headers=header)
@@ -124,6 +124,7 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
         file_detail['changes'] = file['changes']
         file_detail['raw_patch'] = file['patch']
         file_detail['raw_url'] = file['raw_url']
+
         if file['status'] == 'added':
             file_detail['processed_patch'] = [{
                 'patch_start': 1,

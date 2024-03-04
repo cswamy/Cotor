@@ -4,14 +4,14 @@ import json
 import utils
 import pprint
 
-# repo_link = "https://github.com/gradio-app/gradio"
-repo_link = "https://github.com/pydantic/FastUI"
+repo_link = "https://github.com/gradio-app/gradio"
+# repo_link = "https://github.com/pydantic/FastUI"
 # repo_link = "https://github.com/cswamy/edgar"
 owner = repo_link.split('/')[3]
 repo = repo_link.split('/')[4]
 
-# issue_number = 6973
-issue_number = 148
+issue_number = 6973
+# issue_number = 148
 # issue_number = 8
 
 issue_details = {}
@@ -34,4 +34,4 @@ if issue is not None:
         if len(commit_details['file_details']) == commit_details['files_changed']:
             utils.add_patch_explains(commit_details, issue)
             issue_details["commit_details"] = commit_details
-            utils.upload_supabase(issue_details)
+            # utils.upload_supabase(issue_details)
