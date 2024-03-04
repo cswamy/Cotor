@@ -1,4 +1,6 @@
-import { React, useState, useEffect } from 'react';
+import { React, useState, useEffect, useRef } from 'react';
+
+import Markdown from 'react-markdown'
 
 // Import mui components
 import {
@@ -107,13 +109,22 @@ const IssueDisplay = () => {
         }
     }, [issueData]);
 
+    const markdownRef = useRef(null);
+    const [codeHeight, setCodeHeight] = useState('100vh');
+    useEffect(() => {
+        if (markdownRef.current) {
+            const height = markdownRef.current.offsetHeight;
+            setCodeHeight(`${height}px`);
+        }
+    }, []);
+
     return (
         <Box>
             {!trigger &&
-            <Box>
-                <HeaderMenu page='issue'/>
-            </Box>
-}
+                <Box>
+                    <HeaderMenu page='issue'/>
+                </Box>
+            }
             
             {dataLoading ?
             (
@@ -213,21 +224,29 @@ const IssueDisplay = () => {
                             <Typography variant={typoVariant} sx={{mb: 2, px: 2, py: 1, backgroundColor: '#f6f6f6'}}>
                                 <b>File: </b>{file['filename']}
                             </Typography>
-                            <Grid container sx={{ px: 2}} spacing={2}>
-                                <Grid item xs={12} sm={6}>
-                                    <Box>
-                                        <Typography variant={typoVariant} sx={{mb: 2}}>
+                            <Grid container sx={{ px: 2 }} spacing={2}>
+                                <Grid item xs={12} sm={4} ref={markdownRef}>
+                                    <Paper elevation={2} sx={{p: 1, mb: 2, backgroundColor: '#f6f6f6'}}>
+                                        <Markdown>
                                             {file['patch_explains']}
-                                        </Typography>
-                                    </Box>
+                                        </Markdown>
+                                    </Paper>
                                 </Grid>
 
-                                <Grid item xs={12} sm={6}>
-                                    <Box sx={{maxWidth: '100%'}}>
+                                <Grid item xs={12} sm={8}>
+                                    <Paper 
+                                    sx={{ 
+                                        overflowX: 'auto', 
+                                        whiteSpace: 'pre-wrap', 
+                                        wordWrap: 'break-word',
+                                        maxHeight: codeHeight,
+                                        p: 2,
+                                        mb: 2,
+                                    }}>
                                         <pre>
                                             <code>{file['raw_code']}</code>
                                         </pre>
-                                    </Box>
+                                    </Paper>
                                 </Grid>
                             </Grid> 
                         </Paper>
