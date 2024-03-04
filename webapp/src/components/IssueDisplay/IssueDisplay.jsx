@@ -15,6 +15,8 @@ import {
   TableHead,
   TableRow,
   Paper,
+  useScrollTrigger,
+  Grid,
 } from '@mui/material';
 
 // Import networking and dB
@@ -42,6 +44,10 @@ const IssueDisplay = () => {
     const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down('xs'));
     const [dataLoading, setDataLoading] = useState(true);
     const typoVariant = 'subtitle1'
+    const trigger = useScrollTrigger({
+        disableHysteresis: true,
+        threshold: 10,
+      });
 
     useEffect(() => {
 
@@ -104,9 +110,11 @@ const IssueDisplay = () => {
 
     return (
         <Box>
+            {!trigger &&
             <Box>
                 <HeaderMenu page='issue'/>
             </Box>
+}
             
             {dataLoading ?
             (
@@ -125,7 +133,7 @@ const IssueDisplay = () => {
                     <Typography variant='h4'>
                         Issue details
                     </Typography>
-                    <Paper elevation={2} sx={{p: 2, my: 2, backgroundColor: '#f0f0f0'}}>
+                    <Paper elevation={2} sx={{p: 2, my: 2, backgroundColor: '#f6f6f6'}}>
                         <Typography variant={typoVariant}>
                             <b>Repository</b>: {issueData['repo'] + ' '}
                         </Typography>
@@ -194,7 +202,37 @@ const IssueDisplay = () => {
                     </TableContainer>
                     <Divider sx= {{my: 4}}/>
                 </Box>
-                
+
+                <Box>
+                    <Typography variant='h4' sx={{mb: 2}}>
+                        Code changes
+                    </Typography>
+                    {issueData['commit_details']['file_details']
+                    .sort((a, b) => b['changes'] - a['changes'])
+                    .map((file) => (
+                        <Paper key={file['filename']} elevation={2} sx={{ my: 2 }}>
+                            <Typography variant={typoVariant} sx={{mb: 2, px: 2, py: 1, backgroundColor: '#f6f6f6'}}>
+                                <b>File: </b>{file['filename']}
+                            </Typography>
+                            <Grid container sx={{ px: 2}}>
+                                <Grid item xs={12} sm={6}>
+                                    <Box>
+
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography variant={typoVariant} sx={{mb: 2}}>
+                                        <b>Type of change: </b>{file['status']}
+                                    </Typography>
+                                </Grid>
+
+                            </Grid> 
+                        </Paper>
+                    ))}
+                    
+                    <Divider sx= {{my: 4}}/>
+                </Box>
+
             </Box>
             )}
 
