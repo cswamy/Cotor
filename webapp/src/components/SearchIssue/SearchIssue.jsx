@@ -71,6 +71,9 @@ const SearchIssue = () => {
                 } else if (response.data.issue_status === 'open') {
                     setAlertMessage('Issue is still open. Please try again with a closed issue.')
                     setShowAlert(true);
+                } else if (response.data.issue_status === 'closed_without_pr') {
+                    setAlertMessage('Issue was closed without a pull request.')
+                    setShowAlert(true);
                 } else {
                     navigate(
                         '/issue',

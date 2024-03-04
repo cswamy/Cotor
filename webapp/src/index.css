@@ -8,6 +8,14 @@
 
 @font-face {
   font-family: 'DM Sans';
+  font-style: bold;
+  font-weight: 700;
+  src: local('DM Sans Variable'), local('DMSans-VariableFont_opsz,wght'),
+       url('./fonts/DMSans-VariableFont_opsz,wght.ttf') format('truetype'); 
+}
+
+@font-face {
+  font-family: 'DM Sans';
   font-style: italic;
   font-weight: 200 300; 
   src: local('DM Sans Variable Italic'), local('DMSans-Italic-VariableFont_opsz,wght'),

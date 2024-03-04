@@ -42,6 +42,10 @@ def validate_inputs(owner: str, repo: str, issue: int) -> dict:
             response['issue_url'] = issue_response.json()['html_url']
             response['issue_title'] = issue_response.json()['title']
             response['issue_body'] = issue_response.json()['body']
+            # Check if issue was closed without PR
+            merged_commit = utils.get_merged_commit(owner, repo, response['issue_url'])
+            if merged_commit['pr_number'] is None or merged_commit['pr_merge_sha'] is None:
+                response['issue_status'] = 'closed_without_pr'
         else:
             response['issue_exists'] = True
             response['issue_status'] = 'open'
