@@ -45,6 +45,7 @@ const IssueDisplay = () => {
 
     const theme = useTheme();
     const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down('xs'));
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
     const [dataLoading, setDataLoading] = useState(true);
     const typoVariant = 'subtitle1'
@@ -113,7 +114,7 @@ const IssueDisplay = () => {
 
     return (
         <Box>
-            {!trigger && !dataLoading &&
+            {(!trigger || isSmallScreen) && !dataLoading &&
                 <Box>
                     <HeaderMenu page='issue'/>
                 </Box>
@@ -261,7 +262,11 @@ const IssueDisplay = () => {
                         </Paper>
                     ))}
                     
-                    <Divider sx= {{my: 4}}/>
+                    <Divider 
+                    sx= {{
+                        mt: isSmallScreen ? 6 : 4,
+                        mb: isSmallScreen ? 6 : 4,
+                    }}/>
                 </Box>
 
             </Box>

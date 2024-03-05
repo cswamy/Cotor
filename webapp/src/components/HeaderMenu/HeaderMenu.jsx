@@ -9,40 +9,40 @@ import {
     useMediaQuery,
 } from '@mui/material';
 
+// Import networking
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabaseClient';
+
 const HeaderMenu = (props) => {
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const navigate = useNavigate();
 
     const sourcePage = props.page;
     let button1Text = '';
     let button2Text = '';
-    let button3Text = '';
     if (sourcePage === 'search') {
-        button1Text = 'History';
-        button2Text = 'Logout';
+        button1Text = 'Logout';
     } else if (sourcePage === 'issue') {
-        button1Text = 'Search';
-        button2Text = 'History';
-        button3Text = 'Logout';
-    } else if (sourcePage === 'history') {
         button1Text = 'Search';
         button2Text = 'Logout';
     } else {
         button1Text = 'Search';
-        button2Text = 'History';
+        button2Text = 'Logout';
     } 
 
-    const button1Clicked = () => {
-        console.log('Clicked: ', button1Text);
+    const handleSignout = async () => {
+        await supabase.auth.signOut();
     };
 
-    const button2Clicked = () => {
-        console.log('Clicked: ', button2Text);
-    };
-
-    const button3Clicked = () => {
-        console.log('Clicked: ', button3Text);
+    const buttonClicked = (event) => {
+        if (event.target.textContent === 'Search') {
+            navigate('/search');
+        } else if (event.target.textContent === 'Logout') {
+            handleSignout();
+            navigate('/', { replace: true });
+        }
     };
 
     return (
@@ -68,12 +68,13 @@ const HeaderMenu = (props) => {
                     borderBottom: isSmallScreen ? 'none' : '1px solid black',
                 },
             }}
-            onClick={button1Clicked}
+            onClick={buttonClicked}
             >
                 <Typography variant="subtitle2">
                     {button1Text}
                 </Typography>
             </Button>
+            { sourcePage === 'issue' &&
             <Button
             sx={{
                 color: 'black',
@@ -85,28 +86,10 @@ const HeaderMenu = (props) => {
                     borderBottom: isSmallScreen ? 'none' : '1px solid black',
                 },
             }}
-            onClick={button2Clicked}
+            onClick={buttonClicked}
             >
                 <Typography variant="subtitle2">
                     {button2Text}
-                </Typography>
-            </Button>
-            {sourcePage !== 'search' &&
-            <Button
-            sx={{
-                color: 'black',
-                textTransform: 'none',
-                borderBottom: isSmallScreen ? 'none' : '0.5px solid black',
-                borderRadius: 0,
-                ml: 2,
-                '&:hover': {
-                    borderBottom: isSmallScreen ? 'none' : '1px solid black',
-                },
-            }}
-            onClick={button3Clicked}
-            >
-                <Typography variant="subtitle2">
-                    {button3Text}
                 </Typography>
             </Button>
             }
