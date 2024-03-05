@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 
 // Import networking and dB
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 import axios from 'axios';
 
@@ -53,6 +53,7 @@ const IssueDisplay = () => {
         disableHysteresis: true,
         threshold: 10,
       });
+    const navigate = useNavigate();
 
     useEffect(() => {
 
@@ -80,31 +81,41 @@ const IssueDisplay = () => {
     useEffect(() => {
 
         const getIssueFromAPI = async () => {
-            let url = 'http://127.0.0.1:8000/researchissue'
-            const response = await axios.request({
-                method: 'GET',
-                url: url,
-                params: {
-                    owner: owner,
-                    repo: repo,
-                    issue: issue,
-                    issue_url: issue_url,
-                    issue_title: issue_title,
-                    issue_body: issue_body,
+            let response;
+            try {
+                let url = 'http://127.0.0.1:8000/researchissue'
+                response = await axios.request({
+                    method: 'GET',
+                    url: url,
+                    params: {
+                        owner: owner,
+                        repo: repo,
+                        issue: issue,
+                        issue_url: issue_url,
+                        issue_title: issue_title,
+                        issue_body: issue_body,
+                    }
+                });
+                if (response.data) {
+                    setIssueData(response.data);
+                    if (response.data['commit_details']['file_details'][0]['patch_explains'] !== 'Empty') {
+                        await supabase.from('Issues').insert(response.data);
+                    }
                 }
-            });
-            if (response.data) {
-                setIssueData(response.data);
-                if (response.data['commit_details']['file_details'][0]['patch_explains'] !== 'Empty') {
-                    await supabase.from('Issues').insert(response.data);
-                }
+            } catch (error) {
+                navigate(
+                    '/error',
+                    {
+                        'replace': true,
+                    }
+                )
             }
         }
 
         if (!issueInDB) {
             getIssueFromAPI();
         }
-    }, [issueInDB, owner, repo, issue, issue_url, issue_title, issue_body]);
+    }, [issueInDB, owner, repo, issue, issue_url, issue_title, issue_body, navigate]);
 
     useEffect(() => {
         if (Object.keys(issueData).length > 0) {
@@ -121,7 +132,9 @@ const IssueDisplay = () => {
             }
             
             {dataLoading ?
-            (
+            (   
+                issueInDB ?
+                (
                 <Box sx={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -130,6 +143,27 @@ const IssueDisplay = () => {
                 }}>
                     <CircularProgress sx={{color: 'black'}}/>
                 </Box>
+                ) : (
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: isExtraSmallScreen ? '50vh' : '80vh',
+                }}>
+                    
+                    <Typography variant='h5'>
+                        This issue is not in our vault yet.
+                    </Typography>
+                    <Typography variant='h6'>
+                        Calling in some AI reinforcements!
+                    </Typography>
+                    <Typography variant='subtitle1'>
+                        This might take a few seconds.
+                    </Typography>
+                    <CircularProgress sx={{color: 'black', mt: 2}}/>
+                </Box>
+                )
             ) : (
             <Box sx={{mt:10, ml: 4, mr: 6}}>   
                 

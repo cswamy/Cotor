@@ -31,6 +31,7 @@ const SearchIssue = () => {
     const [issueNumber, setIssueNumber] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [buttonClicked, setButtonClicked] = useState(false);
 
     const handleGHLinkChange = (event) => {
         setGhLink(event.target.value);
@@ -41,6 +42,7 @@ const SearchIssue = () => {
     };
 
     const searchClicked = async () => {
+        setButtonClicked(true);
         if (ghLink === '' || issueNumber === '') {
             setAlertMessage('Please enter a GitHub link and an issue number');
             setShowAlert(true);
@@ -53,15 +55,23 @@ const SearchIssue = () => {
                 setAlertMessage('Please enter a valid GitHub link and issue number');
                 setShowAlert(true);
             } else {
-                let url = 
-                'http://127.0.0.1:8000/validateinputs/' + owner + '/' + repo;
-                const response = await axios.request({
-                    method: 'GET',
-                    url: url,
-                    params: {
-                        issue: issueNumber,
-                    },
-                });
+                let response;
+                try {
+                    let url = 'http://127.0.0.1:8000/validateinputs/' + owner + '/' + repo;
+                    response = await axios.request({
+                        method: 'GET',
+                        url: url,
+                        params: {
+                            issue: issueNumber,
+                        },
+                    });
+                } catch (err) {
+                    setAlertMessage('Oops something went wrong! Please try again.')
+                    setShowAlert(true);
+                    setButtonClicked(false);
+                    return;
+                }
+                
                 if (response.data.repo_exists === false) {
                     setAlertMessage('Could not find repository. Please check and try again.')
                     setShowAlert(true);
@@ -91,6 +101,7 @@ const SearchIssue = () => {
                 }
             }
         }
+        setButtonClicked(false);
     };
 
     useEffect(() => {
@@ -115,7 +126,7 @@ const SearchIssue = () => {
                     </Alert>   
                 </Collapse>
 
-                {!showAlert &&
+                {!showAlert && !buttonClicked &&
                 <HeaderMenu page='search'/>
                 }
             </Box>
@@ -230,7 +241,6 @@ const SearchIssue = () => {
                             sx={{
                                 backgroundColor: '#dadada',
                                 color: 'black',
-                                border: '1px solid #dadada',
                                 borderRadius: '25px',
                                 '&:hover': {
                                     backgroundColor: 'black',
@@ -240,8 +250,9 @@ const SearchIssue = () => {
                                 width: isSmallScreen ? '30%' : '10%',
                             }}
                             onClick={searchClicked}
+                            disabled={buttonClicked}
                             >
-                                Search
+                                {buttonClicked ? 'Searching . . .' : 'Search'}
                             </Button>
                         </Box>
                     </Grid>
