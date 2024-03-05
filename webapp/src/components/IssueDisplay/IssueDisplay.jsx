@@ -45,6 +45,7 @@ const IssueDisplay = () => {
 
     const theme = useTheme();
     const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down('xs'));
+    const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
     const [dataLoading, setDataLoading] = useState(true);
     const typoVariant = 'subtitle1'
     const trigger = useScrollTrigger({
@@ -112,7 +113,7 @@ const IssueDisplay = () => {
 
     return (
         <Box>
-            {!trigger &&
+            {!trigger && !dataLoading &&
                 <Box>
                     <HeaderMenu page='issue'/>
                 </Box>
@@ -189,7 +190,7 @@ const IssueDisplay = () => {
                                 .map((file) => (
                                     <TableRow key={file['filename']}>
                                         <TableCell component="th" scope="row">
-                                            {file['filename']}
+                                                {file['filename']}
                                         </TableCell>
                                         <TableCell align="center">
                                             {file['status']}
@@ -213,9 +214,24 @@ const IssueDisplay = () => {
                     .sort((a, b) => b['changes'] - a['changes'])
                     .map((file) => (
                         <Paper key={file['filename']} elevation={2} sx={{ my: 2 }}>
-                            <Typography variant={typoVariant} sx={{mb: 2, px: 2, py: 1, backgroundColor: '#f6f6f6'}}>
-                                <b>File: </b>{file['filename']}
-                            </Typography>
+                            <Box>
+                                <Grid container>
+                                    <Grid item xs={12} sm={6}>
+                                    <Typography variant={typoVariant} sx={{mb: 2, px: 2, py: 1, backgroundColor: '#f6f6f6'}}>
+                                        <b>File: </b>{file['filename']}
+                                    </Typography>
+                                    </Grid>
+                                    <Grid 
+                                    item xs={12} 
+                                    sm={6} 
+                                    sx={{textAlign: isMediumScreen? 'left' : 'right'}}
+                                    >
+                                    <Typography variant={typoVariant} sx={{mb: 2, px: 2, py: 1, backgroundColor: '#f6f6f6'}}>
+                                        <b>Change: </b>{file['status']}
+                                    </Typography>
+                                    </Grid>
+                                </Grid>
+                            </Box>
                             <Grid container sx={{ px: 2 }} spacing={2}>
                                 <Grid item xs={12} sm={4}>
                                     <Paper elevation={2} sx={{p: 1, mb: 2, backgroundColor: '#f6f6f6'}}>

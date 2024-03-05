@@ -111,7 +111,7 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
             file_detail['raw_code'] = f"Couldn't fetch code from {file['raw_url']}"
         if file['status'] == 'added':
             file_detail['processed_patch'] = list(range(
-                1, len(file['patch'].split('\n'))-1
+                1, len(file['patch'].split('\n'))
             ))
         else:
             file_detail['processed_patch'] = process_patches(file['patch'])
