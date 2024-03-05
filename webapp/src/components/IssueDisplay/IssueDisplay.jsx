@@ -1,4 +1,4 @@
-import { React, useState, useEffect, useRef } from 'react';
+import { React, useState, useEffect } from 'react';
 
 import Markdown from 'react-markdown'
 
@@ -28,6 +28,7 @@ import axios from 'axios';
 
 // Import custom components
 import HeaderMenu from '../HeaderMenu/HeaderMenu';
+import CodeBlock from './CodeBlock/CodeBlock'
 
 const IssueDisplay = () => {
 
@@ -108,15 +109,6 @@ const IssueDisplay = () => {
             setDataLoading(false);
         }
     }, [issueData]);
-
-    const markdownRef = useRef(null);
-    const [codeHeight, setCodeHeight] = useState('100vh');
-    useEffect(() => {
-        if (markdownRef.current) {
-            const height = markdownRef.current.offsetHeight;
-            setCodeHeight(`${height}px`);
-        }
-    }, []);
 
     return (
         <Box>
@@ -225,7 +217,7 @@ const IssueDisplay = () => {
                                 <b>File: </b>{file['filename']}
                             </Typography>
                             <Grid container sx={{ px: 2 }} spacing={2}>
-                                <Grid item xs={12} sm={4} ref={markdownRef}>
+                                <Grid item xs={12} sm={4}>
                                     <Paper elevation={2} sx={{p: 1, mb: 2, backgroundColor: '#f6f6f6'}}>
                                         <Markdown>
                                             {file['patch_explains']}
@@ -239,13 +231,14 @@ const IssueDisplay = () => {
                                         overflowX: 'auto', 
                                         whiteSpace: 'pre-wrap', 
                                         wordWrap: 'break-word',
-                                        maxHeight: codeHeight,
+                                        maxHeight: '100vh',
                                         p: 2,
                                         mb: 2,
-                                    }}>
-                                        <pre>
-                                            <code>{file['raw_code']}</code>
-                                        </pre>
+                                    }}> 
+                                        <CodeBlock 
+                                        code={file['raw_code']} 
+                                        highlights={file['processed_patch']}
+                                        />
                                     </Paper>
                                 </Grid>
                             </Grid> 

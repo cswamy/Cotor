@@ -73,7 +73,7 @@ def get_merged_commit(owner: str, repo: str, issue_url: str) -> dict:
 def get_commit_details(owner: str, repo:str, ref: str) -> dict:
 
     # Helper function for files with many patches
-    def process_patches(patch: str) -> List[dict]:
+    def process_patches(patch: str) -> List:
         # split patch into lines
         lines = patch.split('\n')
         processed_patches = []
@@ -84,10 +84,8 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
                 hunk_header = line.split(' ')
                 code_edit_starts = int(hunk_header[2].split(',')[0].replace('+', ''))
                 code_edit_context = int(hunk_header[2].split(',')[1])
-                patch_dict = {}
-                patch_dict['patch_start'] = code_edit_starts
-                patch_dict['context'] = code_edit_context
-                processed_patches.append(patch_dict)
+                patch_list = range(code_edit_starts, code_edit_starts + code_edit_context)
+                processed_patches.extend(patch_list)
         return processed_patches
 
     url = f'https://api.github.com/repos/{owner}/{repo}/commits/{ref}'
@@ -112,10 +110,9 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
         else: 
             file_detail['raw_code'] = f"Couldn't fetch code from {file['raw_url']}"
         if file['status'] == 'added':
-            file_detail['processed_patch'] = [{
-                'patch_start': 1,
-                'context': len(file['patch'].split('\n'))-1
-            }]
+            file_detail['processed_patch'] = list(range(
+                1, len(file['patch'].split('\n'))-1
+            ))
         else:
             file_detail['processed_patch'] = process_patches(file['patch'])
         file_details.append(file_detail)
