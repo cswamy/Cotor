@@ -146,7 +146,10 @@ const IssueDisplay = () => {
                         Calling in some AI reinforcements!
                     </Typography>
                     <Typography variant='subtitle1'>
-                        This might take a few seconds.
+                        This might take a few seconds but we promise it's worth the wait.
+                    </Typography>
+                    <Typography variant='subtitle1'>
+                        Next time you pull up this issue, it will be lightning fast!!
                     </Typography>
                     <CircularProgress sx={{color: 'black', mt: 2}}/>
                 </Box>

@@ -74,9 +74,9 @@ const SearchIssue = () => {
                                     'owner': owner,
                                     'repo': repo,
                                     'issue': issueNumber,
-                                    'issue_url': '',
-                                    'issue_title': '',
-                                    'issue_body': '',
+                                    'issue_url': data[0]['issue_url'],
+                                    'issue_title': data[0]['issue_title'],
+                                    'issue_body': data[0]['issue_body'],
                                     'dbData': data[0],
                                 }
                             }

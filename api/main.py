@@ -68,6 +68,7 @@ def research_issue(
     response['issue_id'] = issue
     response['issue_title'] = issue_title
     response['issue_body'] = issue_body
+    response['issue_url'] = issue_url
     response['created_at'] = datetime.datetime.now().isoformat()
     response['updated_at'] = datetime.datetime.now().isoformat()
 
