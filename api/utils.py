@@ -11,9 +11,7 @@ from bs4 import BeautifulSoup
 
 # function to call github api used across all functions
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-def call_github_api(url: str):
-    load_dotenv()
-    token = os.getenv('GITHUB_TOKEN')
+def call_github_api(url: str, token: str):
     header = {
         'Authorization': f'Bearer {token}',
         'Accept': 'application/vnd.github+json',
@@ -42,9 +40,9 @@ def call_llm(payload: dict):
         print(f"LLM request failed for {url}")
     return response
 
-def get_merged_commit(owner: str, repo: str, issue_url: str) -> dict:
+def get_merged_commit(owner: str, repo: str, issue_url: str, token: str) -> dict:
 
-    html = call_github_api(issue_url).text
+    html = call_github_api(issue_url, token).text
     
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -63,14 +61,14 @@ def get_merged_commit(owner: str, repo: str, issue_url: str) -> dict:
                 if 'pull' in first_link['href']:
                     pr_number = first_link['href'].split('/')[-1]
                     url = f'https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}'
-                    pr_details = call_github_api(url)
+                    pr_details = call_github_api(url, token)
                     if pr_details.json()['merged'] == True:
                         merged_commit['pr_number'] = pr_number
                         merged_commit['pr_merge_sha'] = pr_details.json()['merge_commit_sha']
 
     return merged_commit
 
-def get_commit_details(owner: str, repo:str, ref: str) -> dict:
+def get_commit_details(owner: str, repo:str, ref: str, token: str) -> dict:
 
     # Helper function for files with many patches
     def process_patches(patch: str) -> List:
@@ -89,7 +87,7 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
         return processed_patches
 
     url = f'https://api.github.com/repos/{owner}/{repo}/commits/{ref}'
-    response = call_github_api(url)
+    response = call_github_api(url, token)
 
     commit_details = {}
     json_response = response.json()
@@ -103,7 +101,7 @@ def get_commit_details(owner: str, repo:str, ref: str) -> dict:
         file_detail['raw_patch'] = file['patch']
         file_detail['raw_url'] = file['raw_url']
         # Get raw code
-        html = call_github_api(file['raw_url']).text
+        html = call_github_api(file['raw_url'], token).text
         soup = BeautifulSoup(html, 'html.parser')
         if soup.text:
             file_detail['raw_code'] = soup.text

@@ -31,7 +31,7 @@ const NotFoundPage = () => {
                 Nooooooo!
             </Typography>
             <Typography variant="h6" align="center">
-                {`How have we found ourselves here :(`}
+                {`How did we find ourselves here :(`}
             </Typography>
             <Typography variant="subtitle1" align="center">
                 Please click on search and try again

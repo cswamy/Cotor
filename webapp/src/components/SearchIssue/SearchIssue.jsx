@@ -26,6 +26,7 @@ const SearchIssue = () => {
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
+    const [token, setToken] = useState(null);
 
     // Input and search button logic
     const [ghLink, setGhLink] = useState('');
@@ -33,6 +34,19 @@ const SearchIssue = () => {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [buttonClicked, setButtonClicked] = useState(false);
+
+    useEffect(() => {
+        const getUser = async () => {
+            const {data, error} = await supabase.auth.getSession();
+            if (error) {
+                console.log('Error');
+            } else {
+                setToken(data['session']['provider_token']);
+            }
+        }
+
+        getUser();
+    }, []);
 
     const handleGHLinkChange = (event) => {
         setGhLink(event.target.value);
@@ -78,6 +92,7 @@ const SearchIssue = () => {
                                     'issue_title': data[0]['issue_title'],
                                     'issue_body': data[0]['issue_body'],
                                     'dbData': data[0],
+                                    'token': token,
                                 }
                             }
                         );
@@ -91,6 +106,9 @@ const SearchIssue = () => {
                     response = await axios.request({
                         method: 'GET',
                         url: url,
+                        headers: {
+                            Authorization: 'Bearer ' + token
+                        },
                         params: {
                             issue: issueNumber,
                         },
@@ -126,6 +144,7 @@ const SearchIssue = () => {
                                 'issue_title': response.data.issue_title,
                                 'issue_body': response.data.issue_body,
                                 'dBData': null,
+                                'token': token,
                             }
                         }
                     );

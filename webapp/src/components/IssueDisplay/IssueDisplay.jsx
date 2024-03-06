@@ -42,6 +42,7 @@ const IssueDisplay = () => {
         issue_title,
         issue_body,
         dbData,
+        token,
     } = useLocation().state;
 
     const theme = useTheme();
@@ -65,6 +66,8 @@ const IssueDisplay = () => {
         }
     }, [dbData]);
 
+    console.log(token);
+
     useEffect(() => {
 
         const getIssueFromAPI = async () => {
@@ -74,6 +77,9 @@ const IssueDisplay = () => {
                 response = await axios.request({
                     method: 'GET',
                     url: url,
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    },
                     params: {
                         owner: owner,
                         repo: repo,
@@ -102,7 +108,7 @@ const IssueDisplay = () => {
         if (!issueInDB) {
             getIssueFromAPI();
         }
-    }, [issueInDB, owner, repo, issue, issue_url, issue_title, issue_body, navigate]);
+    }, [issueInDB, owner, repo, issue, issue_url, issue_title, issue_body, token, navigate]);
 
     useEffect(() => {
         if (Object.keys(issueData).length > 0) {
