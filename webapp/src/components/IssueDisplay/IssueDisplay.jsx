@@ -41,6 +41,7 @@ const IssueDisplay = () => {
         issue_url, 
         issue_title,
         issue_body,
+        dbData,
     } = useLocation().state;
 
     const theme = useTheme();
@@ -57,26 +58,12 @@ const IssueDisplay = () => {
 
     useEffect(() => {
 
-        const getIssueFromDB = async () => {
-            const { data, error } = await supabase
-                .from('Issues')
-                .select('*')
-                .eq('repo_owner', owner)
-                .eq('repo', repo)
-                .eq('issue_id', issue);
-            if (error) {
-                return;
-            } else {
-                if (data.length > 0) {
-                    setIssueData(data[0]);
-                } else {
-                    setIssueInDB(false);
-                }
-            }
+        if (dbData) {
+            setIssueData(dbData);
+        } else {
+            setIssueInDB(false);
         }
-
-        getIssueFromDB();
-    }, [owner, repo, issue]);
+    }, [dbData]);
 
     useEffect(() => {
 

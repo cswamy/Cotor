@@ -18,6 +18,7 @@ import HeaderMenu from '../HeaderMenu/HeaderMenu';
 
 // Import networking
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../supabaseClient';
 import axios from 'axios';
 
 const SearchIssue = () => {
@@ -55,6 +56,35 @@ const SearchIssue = () => {
                 setAlertMessage('Please enter a valid GitHub link and issue number');
                 setShowAlert(true);
             } else {
+                // First try dB
+                const { data, error } = await supabase
+                    .from('Issues')
+                    .select('*')
+                    .eq('repo_owner', owner)
+                    .eq('repo', repo)
+                    .eq('issue_id', issueNumber);
+                if (error) {
+                    // do nothing
+                } else {
+                    if (data.length > 0) {
+                        navigate(
+                            '/issue',
+                            {
+                                'state': {
+                                    'owner': owner,
+                                    'repo': repo,
+                                    'issue': issueNumber,
+                                    'issue_url': '',
+                                    'issue_title': '',
+                                    'issue_body': '',
+                                    'dbData': data[0],
+                                }
+                            }
+                        );
+                        return;
+                    }
+                }
+                // If not in dB, then check API
                 let response;
                 try {
                     let url = 'http://127.0.0.1:8000/validateinputs/' + owner + '/' + repo;
@@ -95,6 +125,7 @@ const SearchIssue = () => {
                                 'issue_url': response.data.issue_url,
                                 'issue_title': response.data.issue_title,
                                 'issue_body': response.data.issue_body,
+                                'dBData': null,
                             }
                         }
                     );
