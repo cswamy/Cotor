@@ -201,7 +201,7 @@ const IssueDisplay = () => {
                         Summary of changes
                     </Typography>
                     <b>{issueData['commit_details']['files_changed']} files </b> 
-                    changed on pull request that closed issue.
+                    changed on pull request that closed the issue.
                     <TableContainer component={Paper} sx={{mt: 2}}>
                         <Table sx={{minWidth: 650}} size="small" aria-label="a dense table">
                             <TableHead sx={{backgroundColor: 'black'}}>
