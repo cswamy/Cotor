@@ -36,7 +36,7 @@ const HomePage = () => {
         }
     };
 
-    const videoSrc = process.env.PUBLIC_URL + '/media/CotorVideoEdited.mp4';
+    const videoSrc = process.env.PUBLIC_URL + '/CotorVideoEdited.mp4';
 
     // Return component
     return (
