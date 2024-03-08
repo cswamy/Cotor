@@ -10,7 +10,6 @@ import {
     CircularProgress,
     useTheme,
     useMediaQuery,
-    Paper,
 } from '@mui/material';
 
 // Import custom components
@@ -38,8 +37,6 @@ const HomePage = () => {
             setLoading(false);
         }
     };
-
-    const videoSrc = process.env.PUBLIC_URL + '/CotorVideoEdited.mp4';
 
     // Return component
     return (
