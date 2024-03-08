@@ -66,15 +66,13 @@ const IssueDisplay = () => {
         }
     }, [dbData]);
 
-    console.log(token);
-
     useEffect(() => {
 
         const getIssueFromAPI = async () => {
             let response;
             try {
                 // let url = 'http://127.0.0.1:8000/researchissue'
-                let url = 'http://cotor-env.us-east-1.elasticbeanstalk.com/researchissue'
+                let url = 'https://elastic.cotor.dev/researchissue'
                 response = await axios.request({
                     method: 'GET',
                     url: url,

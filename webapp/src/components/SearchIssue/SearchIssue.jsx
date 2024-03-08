@@ -103,7 +103,7 @@ const SearchIssue = () => {
                 let response;
                 try {
                     // let url = 'http://127.0.0.1:8000/validateinputs/' + owner + '/' + repo;
-                    let url = 'http://cotor-env.us-east-1.elasticbeanstalk.com/validateinputs/' + owner + '/' + repo;
+                    let url = 'https://elastic.cotor.dev/validateinputs/' + owner + '/' + repo;
                     response = await axios.request({
                         method: 'GET',
                         url: url,
