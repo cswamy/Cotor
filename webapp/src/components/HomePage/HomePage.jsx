@@ -13,8 +13,6 @@ import {
     Paper,
 } from '@mui/material';
 
-import videoSrc from '../../media/CotorVideoEdited.mp4';
-
 const HomePage = () => {
 
     const theme = useTheme();
@@ -27,7 +25,8 @@ const HomePage = () => {
         const { error } = await supabase.auth.signInWithOAuth({ 
             provider: 'github',
             options: {
-                redirectTo: 'http://localhost:3000/search',
+                // redirectTo: 'http://localhost:3000/search',
+                redirectTo: 'https://www.cotor.dev/search',
             },
         });
         if (error) {
@@ -36,6 +35,8 @@ const HomePage = () => {
             setLoading(false);
         }
     };
+
+    const videoSrc = process.env.PUBLIC_URL + '/media/CotorVideoEdited.mp4';
 
     // Return component
     return (
