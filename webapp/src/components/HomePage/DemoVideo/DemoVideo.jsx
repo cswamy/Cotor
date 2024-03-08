@@ -1,5 +1,8 @@
 import { React } from 'react';
 
+// Import mui components
+import { Paper } from '@mui/material';
+
 const DemoVideo = () => {
     
     const videoSrc = process.env.PUBLIC_URL + '/CotorVideoEdited.mp4';
