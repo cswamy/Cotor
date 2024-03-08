@@ -73,7 +73,8 @@ const IssueDisplay = () => {
         const getIssueFromAPI = async () => {
             let response;
             try {
-                let url = 'http://127.0.0.1:8000/researchissue'
+                // let url = 'http://127.0.0.1:8000/researchissue'
+                let url = 'http://cotor-env.us-east-1.elasticbeanstalk.com/researchissue'
                 response = await axios.request({
                     method: 'GET',
                     url: url,
