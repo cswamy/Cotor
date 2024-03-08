@@ -1,8 +1,6 @@
 import requests
 import os
-import pprint
 import json
-import supabase
 
 from dotenv import load_dotenv
 from typing import List, Tuple
