@@ -1,7 +1,6 @@
-tenacity
-requests
-beautifulsoup4
-supabase
-fastapi
-uvicorn
-dotenv
+tenacity==8.2.3
+requests==2.31.0
+beautifulsoup4==4.12.3
+fastapi==0.110.0
+uvicorn==0.27.1
+python-dotenv==1.0.1
