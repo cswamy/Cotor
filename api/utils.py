@@ -26,7 +26,7 @@ def call_github_api(url: str, token: str):
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def call_llm(payload: dict):
     url = "https://api.openai.com/v1/chat/completions"
-    #load_dotenv()
+    # load_dotenv()
     headers = {
         "content-type": "application/json",
         # "authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
