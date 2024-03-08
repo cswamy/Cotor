@@ -13,6 +13,9 @@ import {
     Paper,
 } from '@mui/material';
 
+// Import custom components
+import DemoVideo from './DemoVideo/DemoVideo';
+
 const HomePage = () => {
 
     const theme = useTheme();
@@ -101,11 +104,7 @@ const HomePage = () => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-                <Paper elevation={2}>
-                    <video width="100%" height="100%" autoPlay loop muted>
-                        <source src={videoSrc} type="video/mp4"/>
-                    </video>
-                </Paper>
+                <DemoVideo />
             </Grid>
 
         </Grid>
