@@ -139,6 +139,7 @@ def add_patch_explains(commit_details: dict, issue_title: str, issue_body: str) 
         }
         response = call_llm(payload)
         if response is not None:
+            print(f"[LLM RESPONSE] {response.json()}")
             file['patch_explains'] = response.json()['choices'][0]['message']['content']
         else:
             file['patch_explains'] = "Empty"
