@@ -65,7 +65,7 @@ def get_merged_commit(owner: str, repo: str, issue_url: str, token: str) -> dict
                     if pr_json['merged'] == True:
                         merged_commit['pr_number'] = pr_number
                         merged_commit['pr_merge_sha'] = pr_json['merge_commit_sha']
-                    else if any(label.get('name') == 'Merged' for label in pr_json.get('labels', [])):
+                    elif any(label.get('name') == 'Merged' for label in pr_json.get('labels', [])):
                         merged_commit['pr_number'] = pr_number
                         merged_commit['pr_merge_sha'] = pr_json['merge_commit_sha']
 
