@@ -131,7 +131,7 @@ const SearchIssue = () => {
                     setAlertMessage('Issue is still open. Please try again with a closed issue.')
                     setShowAlert(true);
                 } else if (response.data.issue_status === 'closed_without_pr') {
-                    setAlertMessage('Issue was closed without a pull request.')
+                    setAlertMessage('Issue was closed without a linked pull request.')
                     setShowAlert(true);
                 } else {
                     navigate(
