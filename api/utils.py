@@ -41,33 +41,44 @@ def call_llm(payload: dict):
 
 def get_merged_commit(owner: str, repo: str, issue_url: str, token: str) -> dict:
 
-    html = call_github_api(issue_url, token).text
-    
-    soup = BeautifulSoup(html, 'html.parser')
-
-    search_phrase = "Successfully merging a pull request may close this issue."
-    search_element = soup.find(text=search_phrase)
-
     merged_commit = {
         'pr_number': None,
         'pr_merge_sha': None,
     }
+    html = call_github_api(issue_url, token).text
+    soup = BeautifulSoup(html, 'html.parser')
+    pr_link = None
+
+    # Side bar strategy (primary approach)
+    search_phrase = "Successfully merging a pull request may close this issue."
+    search_element = soup.find(text=search_phrase)
     if search_element:
         next_div = search_element.find_next('div')
         if next_div:
-            first_link = next_div.find('a')
-            if first_link and first_link.has_attr('href'):
-                if 'pull' in first_link['href']:
-                    pr_number = first_link['href'].split('/')[-1]
-                    url = f'https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}'
-                    pr_details = call_github_api(url, token)
-                    pr_json = pr_details.json()
-                    if pr_json['merged'] == True:
-                        merged_commit['pr_number'] = pr_number
-                        merged_commit['pr_merge_sha'] = pr_json['merge_commit_sha']
-                    elif any(label.get('name') == 'Merged' for label in pr_json.get('labels', [])):
-                        merged_commit['pr_number'] = pr_number
-                        merged_commit['pr_merge_sha'] = pr_json['merge_commit_sha']
+            pr_link = next_div.find('a')
+    else:
+        # Comments strategy
+        span = soup.find('span', title='Status: Merged')
+        if span:
+            parent_div = span.find_parent('div')
+            previous_div = parent_div.find_previous_sibling('div')
+            if previous_div:
+                pr_link = previous_div.find('a')
+
+    if pr_link is not None:
+        if pr_link.has_attr('href'):
+            if 'pull' in pr_link['href']:
+                pr_number = pr_link['href'].split('/')[-1]
+                url = f'https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}'
+                pr_details = call_github_api(url, token)
+                pr_json = pr_details.json()
+                if pr_json['merged'] == True:
+                    merged_commit['pr_number'] = pr_number
+                    merged_commit['pr_merge_sha'] = pr_json['merge_commit_sha']
+                # PR status is closed instead of merged. Label Merged added instead
+                elif any(label.get('name') == 'Merged' for label in pr_json.get('labels', [])):
+                    merged_commit['pr_number'] = pr_number
+                    merged_commit['pr_merge_sha'] = pr_json['merge_commit_sha']
 
     return merged_commit
 
