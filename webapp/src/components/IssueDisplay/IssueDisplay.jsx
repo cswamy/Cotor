@@ -144,16 +144,16 @@ const IssueDisplay = () => {
                     height: isExtraSmallScreen ? '50vh' : '80vh',
                 }}>
                     
-                    <Typography variant='h5'>
+                    <Typography variant={isSmallScreen? 'h6' : 'h5'}>
                         This issue is not in our vault yet.
                     </Typography>
-                    <Typography variant='h6'>
+                    <Typography variant={isSmallScreen? 'subtitle1' : 'h6'}>
                         Calling in some AI reinforcements!
                     </Typography>
-                    <Typography variant='subtitle1'>
+                    <Typography variant={isSmallScreen? 'subtitle2' : 'subtitle1'}>
                         This might take a few seconds but we promise it's worth the wait.
                     </Typography>
-                    <Typography variant='subtitle1'>
+                    <Typography variant={isSmallScreen? 'subtitle2' : 'subtitle1'}>
                         Next time you pull up this issue, it will be lightning fast!!
                     </Typography>
                     <CircularProgress sx={{color: 'black', mt: 2}}/>
