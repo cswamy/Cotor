@@ -113,12 +113,15 @@ def get_commit_details(owner: str, repo:str, ref: str, token: str) -> dict:
         for line in lines:
             # if line starts with @@, it's a hunk header
             # Get line number and context for new file only
-            if line.startswith('@@'):
-                hunk_header = line.split(' ')
-                code_edit_starts = int(hunk_header[2].split(',')[0].replace('+', ''))
-                code_edit_context = int(hunk_header[2].split(',')[1])
-                patch_list = range(code_edit_starts, code_edit_starts + code_edit_context)
-                processed_patches.extend(patch_list)
+            try:
+                if line.startswith('@@'):
+                    hunk_header = line.split(' ')
+                    code_edit_starts = int(hunk_header[2].split(',')[0].replace('+', ''))
+                    code_edit_context = int(hunk_header[2].split(',')[1])
+                    patch_list = range(code_edit_starts, code_edit_starts + code_edit_context)
+                    processed_patches.extend(patch_list)
+            except:
+                return list(range(1, len(patch.split('\n'))))
         return processed_patches
 
     url = f'https://api.github.com/repos/{owner}/{repo}/commits/{ref}'
@@ -133,7 +136,11 @@ def get_commit_details(owner: str, repo:str, ref: str, token: str) -> dict:
         file_detail['filename'] = file['filename']
         file_detail['status'] = file['status']
         file_detail['changes'] = file['changes']
-        file_detail['raw_patch'] = file['patch']
+        # Some changes might not come with a patch
+        if 'patch' in file:
+            file_detail['raw_patch'] = file['patch']
+        else:
+            file_detail['raw_patch'] = f"No code changes were made in {file['filename']}."
         file_detail['raw_url'] = file['raw_url']
         # Get raw code
         html = call_github_api(file['raw_url'], token).text
@@ -142,12 +149,13 @@ def get_commit_details(owner: str, repo:str, ref: str, token: str) -> dict:
             file_detail['raw_code'] = soup.text
         else: 
             file_detail['raw_code'] = f"Couldn't fetch code from {file['raw_url']}"
-        if file['status'] == 'added':
+        if file['status'] == 'added' and 'patch' in file:
             file_detail['processed_patch'] = list(range(
                 1, len(file['patch'].split('\n'))
             ))
         else:
-            file_detail['processed_patch'] = process_patches(file['patch'])
+            if 'patch' in file:
+                file_detail['processed_patch'] = process_patches(file['patch'])
         file_details.append(file_detail)
     
     commit_details['file_details'] = file_details
