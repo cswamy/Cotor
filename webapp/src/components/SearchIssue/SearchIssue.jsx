@@ -59,7 +59,7 @@ const SearchIssue = () => {
     const searchClicked = async () => {
         setButtonClicked(true);
         if (ghLink === '' || issueNumber === '') {
-            setAlertMessage('Please enter a GitHub link and an issue number');
+            setAlertMessage('Please enter a GitHub link and a pull request or issue number.');
             setShowAlert(true);
         } else {
             ghLink.trim();
@@ -67,7 +67,7 @@ const SearchIssue = () => {
             let owner = ghLink.split('/')[3];
             let repo = ghLink.split('/')[4];
             if (!owner || !repo || domain !== 'github.com' || isNaN(Number(issueNumber))) {
-                setAlertMessage('Please enter a valid GitHub link and issue number');
+                setAlertMessage('Invalid inputs. Please check and try again.');
                 setShowAlert(true);
             } else {
                 // First try dB
@@ -91,6 +91,7 @@ const SearchIssue = () => {
                                     'issue_url': data[0]['issue_url'],
                                     'issue_title': data[0]['issue_title'],
                                     'issue_body': data[0]['issue_body'],
+                                    'is_pull_request': data[0]['is_pull_request'],
                                     'dbData': data[0],
                                     'token': token,
                                 }
@@ -125,12 +126,20 @@ const SearchIssue = () => {
                     setAlertMessage('Could not find repository. Please check and try again.')
                     setShowAlert(true);
                 } else if (response.data.issue_exists === false) {
-                    setAlertMessage('Could not find issue. Please check and try again.')
+                    setAlertMessage('Could not find pull request or issue. Please check and try again.')
                     setShowAlert(true);
                 } else if (response.data.issue_status === 'open') {
-                    setAlertMessage('Issue is still open. Please try again with a closed issue.')
+                    if (response.data.is_pull_request === true) {
+                        setAlertMessage('Pull request is still open. Please try again with a closed PR.')
+                        setShowAlert(true);
+                    } else {
+                        setAlertMessage('Issue is still open. Please try again with a closed issue.')
+                        setShowAlert(true);
+                    }
+                } else if (response.data.issue_status === 'pr_closed_without_merge') {
+                    setAlertMessage('This pull request was not merged.')
                     setShowAlert(true);
-                } else if (response.data.issue_status === 'closed_without_pr') {
+                } else if (response.data.issue_status === 'issue_closed_without_pr') {
                     setAlertMessage('Issue was closed without a linked pull request.')
                     setShowAlert(true);
                 } else {
@@ -144,6 +153,7 @@ const SearchIssue = () => {
                                 'issue_url': response.data.issue_url,
                                 'issue_title': response.data.issue_title,
                                 'issue_body': response.data.issue_body,
+                                'is_pull_request': response.data.is_pull_request,
                                 'dBData': null,
                                 'token': token,
                             }
@@ -249,7 +259,7 @@ const SearchIssue = () => {
                             variant={isSmallScreen ? 'body1' : 'h6'} 
                             align="center"
                             sx={{mb: 1}}>
-                            Enter a closed issue number
+                            Enter a pull request or issue
                             </Typography>
                             <TextField 
                             size='small'
