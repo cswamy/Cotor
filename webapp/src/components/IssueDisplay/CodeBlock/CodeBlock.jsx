@@ -10,7 +10,12 @@ const CodeBlock = (props) => {
         <Box component="pre" sx={{ overflow: 'auto' }}>
           {lines.map((line, index) => {
             const lineNumber = index + 1;
-            const isHighlighted = props.highlights.includes(lineNumber);
+            let isHighlighted;
+            if (props.highlights !== undefined) {
+              isHighlighted = props.highlights.includes(lineNumber);
+            } else {
+              isHighlighted = false;
+            }
             return (
               <Typography
                 variant="body2"
