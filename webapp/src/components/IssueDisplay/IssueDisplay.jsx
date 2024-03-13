@@ -41,6 +41,7 @@ const IssueDisplay = () => {
         issue_url, 
         issue_title,
         issue_body,
+        is_pull_request,
         dbData,
         token,
     } = useLocation().state;
@@ -51,11 +52,18 @@ const IssueDisplay = () => {
     const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
     const [dataLoading, setDataLoading] = useState(true);
     const typoVariant = 'subtitle1'
+    const [issueOrPRText, setIssueOrPRText] = useState('issue');
     const trigger = useScrollTrigger({
         disableHysteresis: true,
         threshold: 10,
       });
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (is_pull_request === true) {
+            setIssueOrPRText('pull request');
+        }
+    }, [is_pull_request]);
 
     useEffect(() => {
 
@@ -86,6 +94,7 @@ const IssueDisplay = () => {
                         issue_url: issue_url,
                         issue_title: issue_title,
                         issue_body: issue_body,
+                        is_pull_request: is_pull_request,
                     }
                 });
                 if (response.data) {
@@ -107,7 +116,7 @@ const IssueDisplay = () => {
         if (!issueInDB) {
             getIssueFromAPI();
         }
-    }, [issueInDB, owner, repo, issue, issue_url, issue_title, issue_body, token, navigate]);
+    }, [issueInDB, owner, repo, issue, issue_url, issue_title, issue_body, is_pull_request, token, navigate]);
 
     useEffect(() => {
         if (Object.keys(issueData).length > 0) {
@@ -145,7 +154,7 @@ const IssueDisplay = () => {
                 }}>
                     
                     <Typography variant={isSmallScreen? 'h6' : 'h5'}>
-                        This issue is not in our vault yet.
+                        This {issueOrPRText} is not in our vault yet.
                     </Typography>
                     <Typography variant={isSmallScreen? 'subtitle1' : 'h6'}>
                         Calling in some AI reinforcements!
@@ -154,7 +163,7 @@ const IssueDisplay = () => {
                         This might take a few seconds but we promise it's worth the wait.
                     </Typography>
                     <Typography variant={isSmallScreen? 'subtitle2' : 'subtitle1'}>
-                        Next time you pull up this issue, it will be lightning fast!!
+                        Next time you search for this {issueOrPRText}, it will be lightning fast!
                     </Typography>
                     <CircularProgress sx={{color: 'black', mt: 2}}/>
                 </Box>
@@ -164,21 +173,23 @@ const IssueDisplay = () => {
                 
                 <Box>
                     <Typography variant='h4'>
-                        Issue details
+                        {issueOrPRText.charAt(0).toUpperCase() + issueOrPRText.slice(1).toLowerCase()} details
                     </Typography>
                     <Paper elevation={2} sx={{p: 2, my: 2, backgroundColor: '#f6f6f6'}}>
                         <Typography variant={typoVariant}>
                             <b>Repository</b>: {issueData['repo'] + ' '}
                         </Typography>
                         <Typography variant={typoVariant}>
-                            <b>Issue</b>: {issueData['issue_id']}
+                            <b>{issueOrPRText.charAt(0).toUpperCase() + issueOrPRText.slice(1).toLowerCase()}</b>: {issueData['issue_id']}
                         </Typography>
                         <Typography variant={typoVariant}>
                             <b>Title</b>: {issueData['issue_title'].replace(/`/g, '')} 
                         </Typography>
-                        <Typography variant={typoVariant}>
-                            <b>Merged pull request</b>: {issueData['merged_pr_id']}
-                        </Typography>
+                        {!issueData['is_pull_request'] &&
+                            <Typography variant={typoVariant}>
+                                <b>Merged pull request</b>: {issueData['merged_pr_id']}
+                            </Typography>
+                        }
                         <Typography variant={typoVariant}>
                             <b>Link to repo</b>: {' '}
                             <a href={'https://github.com/'+owner+'/'+repo} target="_blank" rel="noreferrer">
@@ -186,7 +197,7 @@ const IssueDisplay = () => {
                             </a>
                         </Typography>
                         <Typography variant={typoVariant}>
-                            <b>Link to issue</b>: {' '}
+                            <b>Link to {issueOrPRText}</b>: {' '}
                             <a href={issue_url} target="_blank" rel="noreferrer">
                                 {issue_url}
                             </a>
@@ -200,7 +211,7 @@ const IssueDisplay = () => {
                         Summary of changes
                     </Typography>
                     <b>{issueData['commit_details']['files_changed']} files </b> 
-                    changed on pull request that closed the issue.
+                    were changed to close this {issueOrPRText}.
                     <TableContainer component={Paper} sx={{mt: 2}}>
                         <Table sx={{minWidth: 650}} size="small" aria-label="a dense table">
                             <TableHead sx={{backgroundColor: 'black'}}>

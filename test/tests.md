@@ -1,0 +1,12 @@
+- Bad GH link
+- Bad PR or Issue number
+- Non-existent GH repo
+- Non-existent GH issue or PR
+- Open GH issue
+- Closed issue, no PR
+- Open GH PR
+- Closed PR without merge
+- Good issue from API
+- Good issue from dB
+- Good PR from API
+- Good PR from dB
