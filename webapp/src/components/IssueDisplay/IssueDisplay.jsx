@@ -99,7 +99,7 @@ const IssueDisplay = () => {
                 });
                 if (response.data) {
                     setIssueData(response.data);
-                    if (response.data['commit_details']['file_details'][0]['patch_explains'] !== 'Empty') {
+                    if (response.data['commit_details']['file_details'][0]['patch_explains'] !== 'Please try again') {
                         await supabase.from('Issues').insert(response.data);
                     }
                 }
