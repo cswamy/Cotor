@@ -26,11 +26,11 @@ def call_github_api(url: str, token: str):
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def call_llm(payload: dict):
     url = "https://api.openai.com/v1/chat/completions"
-    # load_dotenv()
+    load_dotenv()
     headers = {
         "content-type": "application/json",
-        # "authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
-        "authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
+        "authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
+        # "authorization": f"Bearer {os.environ['OPENAI_API_KEY']}",
     }
     response = None
     try:
@@ -142,9 +142,8 @@ def get_commit_details(owner: str, repo:str, ref: str, token: str) -> dict:
             file_detail['raw_patch'] = file['patch']
             # Get raw code
             html = call_github_api(file['raw_url'], token).text
-            soup = BeautifulSoup(html, 'html.parser')
-            if soup.text:
-                file_detail['raw_code'] = soup.text
+            if html:
+                file_detail['raw_code'] = html
             else: 
                 file_detail['raw_code'] = f"Couldn't fetch code from {file['raw_url']}"
             if file['status'] == 'added':
