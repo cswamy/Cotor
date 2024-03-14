@@ -264,7 +264,7 @@ const SearchIssue = () => {
                             <TextField 
                             size='small'
                             fullWidth
-                            placeholder='6973'
+                            placeholder='7139'
                             value={issueNumber}
                             onChange={handleissueNumberChange}
                             inputProps={{
