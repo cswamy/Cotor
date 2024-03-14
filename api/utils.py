@@ -136,26 +136,26 @@ def get_commit_details(owner: str, repo:str, ref: str, token: str) -> dict:
         file_detail['filename'] = file['filename']
         file_detail['status'] = file['status']
         file_detail['changes'] = file['changes']
+        file_detail['raw_url'] = file['raw_url']
         # Some changes might not come with a patch
         if 'patch' in file:
             file_detail['raw_patch'] = file['patch']
+            # Get raw code
+            html = call_github_api(file['raw_url'], token).text
+            soup = BeautifulSoup(html, 'html.parser')
+            if soup.text:
+                file_detail['raw_code'] = soup.text
+            else: 
+                file_detail['raw_code'] = f"Couldn't fetch code from {file['raw_url']}"
+            if file['status'] == 'added':
+                file_detail['processed_patch'] = list(range(
+                    1, len(file['patch'].split('\n'))
+                ))
+            else:
+                file_detail['processed_patch'] = process_patches(file['patch'])
         else:
             file_detail['raw_patch'] = f"No code changes were made in {file['filename']}."
-        file_detail['raw_url'] = file['raw_url']
-        # Get raw code
-        html = call_github_api(file['raw_url'], token).text
-        soup = BeautifulSoup(html, 'html.parser')
-        if soup.text:
-            file_detail['raw_code'] = soup.text
-        else: 
-            file_detail['raw_code'] = f"Couldn't fetch code from {file['raw_url']}"
-        if file['status'] == 'added' and 'patch' in file:
-            file_detail['processed_patch'] = list(range(
-                1, len(file['patch'].split('\n'))
-            ))
-        else:
-            if 'patch' in file:
-                file_detail['processed_patch'] = process_patches(file['patch'])
+            file_detail['raw_code'] = f"No code changes were made in {file['filename']}."
         file_details.append(file_detail)
     
     commit_details['file_details'] = file_details
