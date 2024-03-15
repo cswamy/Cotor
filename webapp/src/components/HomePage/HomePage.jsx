@@ -27,8 +27,7 @@ const HomePage = () => {
         const { error } = await supabase.auth.signInWithOAuth({ 
             provider: 'github',
             options: {
-                // redirectTo: 'http://localhost:3000/search',
-                redirectTo: 'https://www.cotor.dev/search',
+                redirectTo: process.env.REACT_APP_OAUTH_REDIRECT_URL,
             },
         });
         if (error) {

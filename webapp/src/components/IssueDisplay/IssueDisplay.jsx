@@ -79,8 +79,7 @@ const IssueDisplay = () => {
         const getIssueFromAPI = async () => {
             let response;
             try {
-                // let url = 'http://127.0.0.1:8000/researchissue'
-                let url = 'https://elastic.cotor.dev/researchissue'
+                let url = process.env.REACT_APP_API_RESEARCH_ISSUE;
                 response = await axios.request({
                     method: 'GET',
                     url: url,
