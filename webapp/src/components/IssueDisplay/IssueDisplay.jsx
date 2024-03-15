@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from 'react';
 
 import Markdown from 'react-markdown'
+import { v4 as uuidv4 } from 'uuid';
 
 // Import mui components
 import {
@@ -19,7 +20,10 @@ import {
   Paper,
   useScrollTrigger,
   Grid,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import IosShareIcon from '@mui/icons-material/IosShare';
 
 // Import networking and dB
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -53,6 +57,7 @@ const IssueDisplay = () => {
     const [dataLoading, setDataLoading] = useState(true);
     const typoVariant = 'subtitle1'
     const [issueOrPRText, setIssueOrPRText] = useState('issue');
+    const [shareLink, setShareLink] = useState('');
     const trigger = useScrollTrigger({
         disableHysteresis: true,
         threshold: 10,
@@ -120,8 +125,19 @@ const IssueDisplay = () => {
     useEffect(() => {
         if (Object.keys(issueData).length > 0) {
             setDataLoading(false);
+            if (issueData['public_link_id']) {
+                setShareLink('https://www.cotor.dev/issue/?id='+issueData['public_link_id']);
+            }
         }
     }, [issueData]);
+
+    const shareClicked = () => {
+        if (shareLink !== '') {
+            console.log("Share link: ", shareLink);
+        } else {
+            console.log("Share link not ready yet");
+        }
+    };
 
     return (
         <Box>
@@ -171,9 +187,24 @@ const IssueDisplay = () => {
             <Box sx={{mt:10, ml: 4, mr: 6}}>   
                 
                 <Box>
+                    
                     <Typography variant='h4'>
                         {issueOrPRText.charAt(0).toUpperCase() + issueOrPRText.slice(1).toLowerCase()} details
+                        <Tooltip title="Create public link" placement="right">
+                            <IconButton 
+                            sx={{ 
+                                ml: 0.5,
+                                '&:hover': {
+                                    //bgcolor: 'black',
+                                    color: 'black',
+                                },
+                            }}
+                            onClick={shareClicked}>
+                                <IosShareIcon sx={{ mb: 0.5 }}/>
+                            </IconButton>
+                        </Tooltip>
                     </Typography>
+                    
                     <Paper elevation={2} sx={{p: 2, my: 2, backgroundColor: '#f6f6f6'}}>
                         <Typography variant={typoVariant}>
                             <b>Repository</b>: {issueData['repo'] + ' '}

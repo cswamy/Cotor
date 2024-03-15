@@ -34,6 +34,7 @@ const SearchIssue = () => {
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [buttonClicked, setButtonClicked] = useState(false);
+    const ENTER_KEY_CODE = 13;
 
     useEffect(() => {
         const getUser = async () => {
@@ -55,6 +56,13 @@ const SearchIssue = () => {
     const handleissueNumberChange = (event) => {
         setIssueNumber(event.target.value);
     };
+
+    const handleEnterKey = (event) => {
+        if (event.keyCode === ENTER_KEY_CODE) {
+          event.preventDefault();
+          searchClicked();
+        }
+      }
 
     const searchClicked = async () => {
         setButtonClicked(true);
@@ -266,6 +274,7 @@ const SearchIssue = () => {
                             placeholder='7139'
                             value={issueNumber}
                             onChange={handleissueNumberChange}
+                            onKeyDown={handleEnterKey}
                             inputProps={{
                                 style: {
                                     fontSize: isSmallScreen ? "0.8rem" : "1rem", 
