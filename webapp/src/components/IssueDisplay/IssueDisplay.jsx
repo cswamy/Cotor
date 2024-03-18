@@ -130,10 +130,7 @@ const IssueDisplay = () => {
         if (Object.keys(issueData).length > 0) {
             setDataLoading(false);
             if (issueData['public_link_id']) {
-                setShareLink(
-                    process.env.REACT_APP_PUBLIC_URL
-                    +'/share?id='
-                    +issueData['public_link_id']);
+                setShareLink(process.env.REACT_APP_PUBLIC_URL+'/issue?id='+issueData['public_link_id']);
             }
         }
     }, [issueData]);

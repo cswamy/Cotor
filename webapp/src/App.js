@@ -15,7 +15,6 @@ import {
 import HomePage from './components/HomePage/HomePage';
 import SearchIssue from './components/SearchIssue/SearchIssue';
 import IssueDisplay from './components/IssueDisplay/IssueDisplay';
-import SharedIssueDisplay from './components/IssueDisplay/SharedIssueDisplay';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 
 // Create theme
@@ -47,7 +46,6 @@ const App = () => {
               </ProtectedRoute>
               } 
             />
-            <Route path="/share" element={<SharedIssueDisplay />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
