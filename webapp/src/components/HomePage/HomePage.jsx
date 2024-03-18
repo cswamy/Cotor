@@ -15,19 +15,31 @@ import {
 // Import custom components
 import DemoVideo from './DemoVideo/DemoVideo';
 
+// Import networking
+import { useSearchParams } from 'react-router-dom';
+
 const HomePage = () => {
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const [loading, setLoading] = useState(false);
 
+    const [searchParams] = useSearchParams();
+    const id = searchParams.get('id');
+
     // GitHub signin button click
     const handleGitHubSignIn = async () => {
         setLoading(true);
+        let redirectURL;
+        if (id) {
+            redirectURL = `${process.env.REACT_APP_OAUTH_REDIRECT_URL}?id=${id}`;
+        } else {
+            redirectURL = process.env.REACT_APP_OAUTH_REDIRECT_URL;
+        }
         const { error } = await supabase.auth.signInWithOAuth({ 
             provider: 'github',
             options: {
-                redirectTo: process.env.REACT_APP_OAUTH_REDIRECT_URL,
+                redirectTo: redirectURL,
             },
         });
         if (error) {

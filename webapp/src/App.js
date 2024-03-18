@@ -46,7 +46,7 @@ const App = () => {
               </ProtectedRoute>
               } 
             />
-            
+
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </AuthProvider>

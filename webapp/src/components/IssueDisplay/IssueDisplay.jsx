@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from 'react';
 
 import Markdown from 'react-markdown'
+import { v4 as uuidv4 } from 'uuid';
 
 // Import mui components
 import {
@@ -19,7 +20,11 @@ import {
   Paper,
   useScrollTrigger,
   Grid,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import IosShareIcon from '@mui/icons-material/IosShare';
+import CheckIcon from '@mui/icons-material/Check';
 
 // Import networking and dB
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -53,6 +58,8 @@ const IssueDisplay = () => {
     const [dataLoading, setDataLoading] = useState(true);
     const typoVariant = 'subtitle1'
     const [issueOrPRText, setIssueOrPRText] = useState('issue');
+    const [shareLink, setShareLink] = useState('');
+    const [shareClicked, setShareClicked] = useState(false);
     const trigger = useScrollTrigger({
         disableHysteresis: true,
         threshold: 10,
@@ -97,6 +104,8 @@ const IssueDisplay = () => {
                     }
                 });
                 if (response.data) {
+                    let public_link_id = uuidv4();
+                    response.data['public_link_id'] = public_link_id;
                     setIssueData(response.data);
                     if (response.data['commit_details']['file_details'][0]['patch_explains'] !== 'Please try again') {
                         await supabase.from('Issues').insert(response.data);
@@ -120,8 +129,23 @@ const IssueDisplay = () => {
     useEffect(() => {
         if (Object.keys(issueData).length > 0) {
             setDataLoading(false);
+            if (issueData['public_link_id']) {
+                setShareLink(process.env.REACT_APP_PUBLIC_URL+'/?id='+issueData['public_link_id']);
+            }
         }
     }, [issueData]);
+
+    const handleShareClick = async () => {
+
+        setShareClicked(true);
+        if (shareLink !== '') {
+            await navigator.clipboard.writeText(shareLink);
+        } 
+
+        setTimeout(() => {
+            setShareClicked(false);
+        }, 2000);
+    };
 
     return (
         <Box>
@@ -171,9 +195,37 @@ const IssueDisplay = () => {
             <Box sx={{mt:10, ml: 4, mr: 6}}>   
                 
                 <Box>
+                    
                     <Typography variant='h4'>
                         {issueOrPRText.charAt(0).toUpperCase() + issueOrPRText.slice(1).toLowerCase()} details
+                        {shareClicked && shareLink !== '' ? (
+                            <Tooltip title="Link copied" placement="right">
+                                <IconButton 
+                                sx={{ 
+                                    ml: 0.5,
+                                    color: 'black',
+                                }}
+                                >
+                                    <CheckIcon sx={{ mb: 0.5 }}/>
+                                </IconButton>
+                            </Tooltip>
+                        ) : 
+                        (
+                            <Tooltip title="Copy report link" placement="right">
+                                <IconButton 
+                                sx={{ 
+                                    ml: 0.5,
+                                    '&:hover': {
+                                        color: 'black',
+                                    },
+                                }}
+                                onClick={handleShareClick}>
+                                    <IosShareIcon sx={{ mb: 0.5 }}/>
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </Typography>
+                    
                     <Paper elevation={2} sx={{p: 2, my: 2, backgroundColor: '#f6f6f6'}}>
                         <Typography variant={typoVariant}>
                             <b>Repository</b>: {issueData['repo'] + ' '}
@@ -196,7 +248,7 @@ const IssueDisplay = () => {
                             </a>
                         </Typography>
                         <Typography variant={typoVariant}>
-                            <b>Link to {issueOrPRText}</b>: {' '}
+                            <b>Link to github {issueOrPRText}</b>: {' '}
                             <a href={issue_url} target="_blank" rel="noreferrer">
                                 {issue_url}
                             </a>
