@@ -80,7 +80,7 @@ const HomePage = () => {
                         Learn an open source codebase and start contributing.
                     </Typography>
                     <Typography variant={isSmallScreen? 'subtitle2': 'subtitle1'} sx={{ mt: 1 }}>
-                        Closed issues for bugs and enhancements are a great way to learn a new codebase. Use Cotor and learn what code changes occured in a merged pull request.  
+                        Closed issues for bugs and enhancements are a great way to learn a new codebase. Use Cotor and learn what code changes occurred in a merged pull request.  
                     </Typography>
                 </Box>
                 <Box 
