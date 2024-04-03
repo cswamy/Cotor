@@ -53,7 +53,8 @@ def validate_inputs(
             response['issue_status'] = 'closed'
             response['issue_url'] = issue_response.json()['html_url']
             response['issue_title'] = issue_response.json()['title']
-            response['issue_body'] = issue_response.json()['body']
+            # response['issue_body'] = issue_response.json()['body']
+            response['issue_body'] = None
             # Check if issue is actually a PR
             if 'pull_request' in issue_response.json():
                 response['is_pull_request'] = True
