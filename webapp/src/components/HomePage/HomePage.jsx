@@ -1,4 +1,4 @@
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 
 // Import mui components
@@ -16,7 +16,7 @@ import {
 import DemoVideo from './DemoVideo/DemoVideo';
 
 // Import networking
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
 
@@ -26,6 +26,7 @@ const HomePage = () => {
 
     const [searchParams] = useSearchParams();
     const id = searchParams.get('id');
+    const navigate = useNavigate();
 
     // GitHub signin button click
     const handleGitHubSignIn = async () => {
@@ -48,6 +49,27 @@ const HomePage = () => {
             setLoading(false);
         }
     };
+
+    // Check if user session exists
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data } = await supabase.auth.getSession();
+            if (data.session !== null) {
+                setLoading(true);
+                let redirectURL;
+                if (id) {
+                    redirectURL = `/search?id=${id}`;
+                } else {
+                    redirectURL = `/search`;
+                }
+                navigate(redirectURL);
+                setLoading(false);
+            }
+        }
+
+        checkSession();
+    }, [id, navigate]);
+
 
     // Return component
     return (
