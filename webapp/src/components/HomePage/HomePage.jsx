@@ -54,7 +54,7 @@ const HomePage = () => {
     useEffect(() => {
         const checkSession = async () => {
             const { data } = await supabase.auth.getSession();
-            if (data.session !== null) {
+            if (data && data['session'] && data['session']['provider_token']) {
                 setLoading(true);
                 let redirectURL;
                 if (id) {
