@@ -1,0 +1,3 @@
+Be precise and concise. 
+You are given a set of files with a filename, patch from a github commit, and an explaination of what changes were made to fix the issue mentioned.
+Your task is to build a tutorial that guides a developer on how to resolve this issue. You can use the code changes from the patch as teaching material but never reveal the actual code in the tutorial.

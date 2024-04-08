@@ -1,0 +1,3 @@
+Be precise and concise. 
+You are given details of an issue including its title, body text (when available), and comments (when available). 
+Your task is to build a tutorial for a developer who is new to the repo on how to solve the issue.

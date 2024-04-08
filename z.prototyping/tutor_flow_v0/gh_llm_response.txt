@@ -1,0 +1,58 @@
+To address the issue of the text color within the `LinePlot` not changing according to the theme settings in a Gradio app, follow these steps:
+
+1. **Understand the Issue**: The developer is trying to change the text color inside the `LinePlot` to be light grey to contrast with a dark background. However, the color change is not being applied to the text within the `LinePlot`.
+
+2. **Review the Code**: Look at the provided code snippet to understand how the theme is being customized and how the `LinePlot` is being created and updated.
+
+3. **Identify the Missing Configuration**: The code snippet provided for the theme customization does not include a specific setting for the text color within the `LinePlot`. Gradio's theming system allows you to customize various aspects of the UI, but it may not cover every single element directly.
+
+4. **Check Gradio Documentation**: Before proceeding, check the [Gradio documentation](https://gradio.app/docs) for any updates or additional information on theming and customizing plots.
+
+5. **Customize the Plot Text Color**: If the Gradio theming system does not provide a direct way to change the text color within the `LinePlot`, you may need to use custom CSS to target the text elements within the plot. Here's how you can do it:
+
+   - Define a custom CSS string that targets the text elements within the SVG that `LinePlot` generates. For example:
+     ```python
+     custom_css = """
+     .gradio-line-plot text {
+         fill: #e0e0e0; /* This is the light grey color */
+     }
+     """
+     ```
+   - Apply the custom CSS to your Gradio interface by passing it to the `css` parameter when creating the `Blocks` object:
+     ```python
+     with gr.Blocks(theme=style, css=custom_css) as demo:
+         # ... rest of the code ...
+     ```
+
+6. **Test the Changes**: After applying the custom CSS, run the Gradio app and check if the text color within the `LinePlot` has changed to light grey as intended.
+
+7. **Iterate if Necessary**: If the text color still does not change, you may need to adjust the CSS selectors or properties. Inspect the elements using browser developer tools to ensure you are targeting the correct elements.
+
+8. **Document the Solution**: Once you have successfully changed the text color, document the steps and the custom CSS used so that other developers facing the same issue can benefit from your solution.
+
+Here's a summary of the steps in code form:
+
+```python
+import gradio as gr
+# ... rest of the imports ...
+
+# ... rest of the code including the Style class ...
+
+custom_css = """
+.gradio-line-plot text {
+    fill: #e0e0e0; /* This is the light grey color */
+}
+"""
+
+style = Style()
+
+# ... rest of the code including the update_plot function ...
+
+with gr.Blocks(theme=style, css=custom_css) as demo:
+    # ... rest of the code ...
+    compute_tco_btn.click(update_plot, inputs=[tco1, tco2, dropdown, dropdown2], outputs=plot)
+
+# ... rest of the code ...
+```
+
+Remember to replace `.gradio-line-plot` with the correct class or ID if it differs in the actual implementation.

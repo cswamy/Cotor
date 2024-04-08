@@ -1,0 +1,55 @@
+# Tutorial: Adding Support for Polars Dataframes in Gradio
+
+In this tutorial, we will guide you through the process of adding support for Polars dataframes to the `gr.DataFrame` component in a Gradio application. Polars is a fast DataFrame library written in Rust with a Python API, and it's a great alternative to pandas for certain use cases.
+
+## Prerequisites
+
+Before we begin, ensure that you have the following prerequisites installed:
+
+- Gradio
+- Polars (optional, only if you want to use Polars dataframes directly)
+
+You can install Polars using pip if you plan to use it:
+
+```bash
+pip install polars
+```
+
+## Step 1: Update the `gr.DataFrame` Component
+
+To add support for Polars dataframes, you need to modify the `gr.DataFrame` component to accept a new `type` parameter value, `"polars"`. This parameter will indicate that the component should handle Polars dataframe objects.
+
+## Step 2: Handling Polars Dataframes
+
+When the `type` parameter is set to `"polars"`, you need to ensure that the `gr.DataFrame` component can preprocess and postprocess Polars dataframes. Implement the following logic:
+
+- In the `preprocess` method, check if the `type` is `"polars"`. If so, convert the input payload to a Polars dataframe. You may need to check if the payload includes headers and construct the dataframe accordingly.
+- In the `postprocess` method, handle the case where the value is a Polars dataframe. Convert it to the `DataframeData` format, which includes `headers` and `data`.
+
+## Step 3: Conditional Import and Dependency Check
+
+Since you don't want to add Polars as a mandatory dependency, you should perform a conditional import of Polars. Create a utility function to check if Polars is available. If a user tries to use the `"polars"` type without having Polars installed, raise an `ImportError` with a message instructing them to install Polars.
+
+## Step 4: Update Documentation and Examples
+
+Update the docstrings of the `gr.DataFrame` component to include information about the new `"polars"` type. Additionally, create examples that demonstrate how to use the `gr.DataFrame` component with Polars dataframes.
+
+## Step 5: Testing
+
+Add Polars to your testing requirements to ensure that your new feature works as expected. Write tests that cover the preprocessing and postprocessing of Polars dataframes.
+
+## Step 6: Create a Demo
+
+To showcase the new feature, create a demo application that uses the `gr.DataFrame` component with Polars dataframes. For example, you can create a demo that sorts records by a specific column using Polars.
+
+Here's a high-level outline of what your demo code might look like:
+
+1. Import Gradio and other necessary libraries.
+2. Define a function that takes a Polars dataframe and performs an operation, such as sorting.
+3. Set up a Gradio interface with `gr.DataFrame` as the input component. Configure it to accept Polars dataframes by setting the `type` parameter to `"polars"`.
+4. Provide an example Polars dataframe or a CSV file that can be converted to a Polars dataframe.
+5. Launch the demo with `demo.launch()`.
+
+## Conclusion
+
+By following these steps, you can add support for Polars dataframes to the `gr.DataFrame` component in Gradio. This will allow users to leverage the performance benefits of Polars while building interactive machine learning applications with Gradio. Remember to handle the Polars dependency conditionally to maintain the flexibility of your application.
