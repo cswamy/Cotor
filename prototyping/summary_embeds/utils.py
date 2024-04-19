@@ -226,6 +226,7 @@ def get_candidate_files(df: pd.DataFrame, issue_embed: List) -> List:
     for idx in top_indices:
         files.append({
             'folder': df['folder'][idx],
-            'file': df['file'][idx]
+            'file': df['file'][idx],
+            'similarity': round(similarities[idx].item(), 2),
             })
     return files

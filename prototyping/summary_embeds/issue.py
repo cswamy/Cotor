@@ -6,10 +6,11 @@ import pprint
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--embeds', type=str, required=True, help='Name of the file with stored embeddings')
+parser.add_argument('--issue', type=int, required=True, help="Issue number from GitHub")
 args = parser.parse_args()
 
 repo_link = 'https://github.com/gradio-app/gradio'
-issue = 6973
+issue = args.issue
 
 if not os.path.exists(args.embeds):
     print("File does not exist")

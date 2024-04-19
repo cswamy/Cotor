@@ -29,7 +29,7 @@ df = utils.add_embeddings(df)
 # utils.upload_to_supabase(df)
 
 # Write dataframe to csv
-with open(f'{args.embeds}.csv', 'w') as f:
+with open(f'{args.embeds}', 'w') as f:
     df.to_csv(f, index=False)
 
 # Kill caffeinate process
