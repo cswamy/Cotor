@@ -2,15 +2,20 @@ import os
 import pandas as pd
 import requests
 import supabase
+import torch
+import ast
+import time
 
 from typing import List
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 from tqdm.auto import tqdm
+from torch import cosine_similarity
 
 # helper function to call llm
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def call_llm(service: str, url: str, payload: dict):
+    
     load_dotenv()
     if service == 'anthropic':
         headers = {
@@ -30,6 +35,10 @@ def call_llm(service: str, url: str, payload: dict):
     response = None
     try:
         response = requests.post(url, json=payload, headers=headers)
+        if response.status_code != 200:
+            print(f"[ERROR] {service} request failure {response.text}")
+            if service == 'anthropic':
+                print(f"[INFO] Response header: {response.headers}")
     except Exception as e:
         print(e)
     
@@ -65,21 +74,21 @@ def extract_repo_files(repo: str, repo_folders: List[str]) -> pd.DataFrame:
     for folder in repo_folders:
         for root, dirs, files in os.walk(folder):
             for file in files:
-                if file in ['dataframe.py']:
-                    try: 
-                        with open(f"{root}/{file}", 'r') as f:
-                            source_code = f.read()
-                            if source_code == '':
-                                continue
-                            new_row = pd.DataFrame({
-                                'repo': [repo], 
-                                'folder': [root], 
-                                'file': [file],
-                                'raw_code': [source_code]
-                            })
-                            df = pd.concat([df, new_row], ignore_index=True)
-                    except:
-                        continue
+                # if file in ['dataframe.py']:
+                try: 
+                    with open(f"{root}/{file}", 'r') as f:
+                        source_code = f.read()
+                        if source_code == '':
+                            continue
+                        new_row = pd.DataFrame({
+                            'repo': [repo], 
+                            'folder': [root], 
+                            'file': [file],
+                            'raw_code': [source_code]
+                        })
+                        df = pd.concat([df, new_row], ignore_index=True)
+                except:
+                    continue
     return df
 
 def add_code_summary(df: pd.DataFrame) -> pd.DataFrame:
@@ -106,6 +115,10 @@ def add_code_summary(df: pd.DataFrame) -> pd.DataFrame:
         response = call_llm(service, url, payload)
         if response is not None and "content" in response.json():
             df['llm_summary'][index] = response.json()['content'][0]['text']
+        else:
+            print(f"[ERROR] Adding summary failed for file: {row['file']}")
+        # Pause execution for 60 seconds to avoid rate limiting
+        time.sleep(60)
     return df
 
 def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:
@@ -128,6 +141,8 @@ def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:
             response = call_llm(service, url, payload)
             if response is not None and 'data' in response.json(): 
                 df['summary_embed'][index] = response.json()['data'][0]['embedding']
+            else:
+                print(f"[ERROR] Adding embedding failed for file: {row['file']}")
 
     return df
 
@@ -148,3 +163,69 @@ def upload_to_supabase(df: pd.DataFrame) -> None:
         response = supabase_client.table(supabase_table).upsert(data_dict).execute()
     except Exception as e:
         print(f"[ERROR] Uploading to Supabase: {e}")
+
+def get_issue_embed(repo_link: str, issue: int) -> List:
+    """
+    Get embeddings for an issue title, body and comments
+    Args:
+    - repo_link: str, link to the repo
+    - issue: int, issue number
+    Returns:
+    - issue_embed: List, embeddings for issue title, body and comments
+    """
+    owner = repo_link.split('/')[3]
+    repo = repo_link.split('/')[4]
+    gh_url = url = f'https://api.github.com/repos/{owner}/{repo}/issues/{issue}'
+    gh_response = call_github_api(gh_url)
+
+    issue_embed = []
+    if gh_response is not None:
+        issue = gh_response.json()
+        issue_text = issue['title'] + issue['body']
+        if issue['comments'] > 0:
+            comments = call_github_api(gh_url + '/comments')
+            if comments is not None: 
+                comments = comments.json()
+                for comment in comments:
+                    if comment['author_association'] in ['OWNER', 'MEMBER', 'CONTRIBUTOR']:
+                        issue_text += comment['body']
+        payload = {
+            "model": "text-embedding-3-small",
+            "input": issue_text,
+        }
+        llm_service = "openai"
+        llm_url = "https://api.openai.com/v1/embeddings"
+        llm_response = call_llm(llm_service, llm_url, payload)
+        if llm_response is not None:
+            issue_embed = llm_response.json()['data'][0]['embedding']
+
+    return issue_embed
+
+def get_candidate_files(df: pd.DataFrame, issue_embed: List) -> List:
+    """
+    Get candidate files based on cosine similarity
+    Args:
+    - df: pd.DataFrame, pandas dataframe with ['repo', 'folder', 'file', 'raw_code', 'embedding']
+    - issue_embed: List, embeddings for issue title, body and comments
+    Returns:
+    - files: List, candidate files based on cosine similarity
+    """
+    repo_embeddings = []
+    for index, row in df.iterrows():
+        if row['summary_embed'] is not None:
+            try:
+                embedding = torch.tensor(ast.literal_eval(row['summary_embed'])).unsqueeze(0)
+                repo_embeddings.append(embedding)
+            except:
+                continue
+    
+    issue_embed = torch.tensor(issue_embed).unsqueeze(0)
+    similarities = [cosine_similarity(issue_embed, file_embed) for file_embed in repo_embeddings]
+    files = []
+    top_indices = torch.argsort(torch.cat(similarities, dim=0), descending=True)[:10].tolist()
+    for idx in top_indices:
+        files.append({
+            'folder': df['folder'][idx],
+            'file': df['file'][idx]
+            })
+    return files

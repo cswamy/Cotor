@@ -1,12 +1,20 @@
 import os
 import utils
 import pandas as pd
-import pprint
+import argparse
+import subprocess
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--embeds', type=str, required=True, help='Name of the file to save the embeddings')
+args = parser.parse_args()
 
 repo_link = 'https://github.com/gradio-app/gradio'
 repo = '../../../gradio'
-folders = ['gradio', 'test']
+folders = ['gradio/components']
 repo_folders = [f"{repo}/{folder}" for folder in folders]
+
+# Prevent OS from sleeping
+caffeinate_process = subprocess.Popen(['caffeinate', "-i"])
 
 # Get dataframe with repo, folder, file, raw_code
 df = utils.extract_repo_files(repo, repo_folders)
@@ -18,19 +26,12 @@ df = utils.add_code_summary(df)
 df = utils.add_embeddings(df)
 
 # Upload dataframe to supabase
-utils.upload_to_supabase(df)
+# utils.upload_to_supabase(df)
 
 # Write dataframe to csv
-#with open('embedding.csv', 'w') as f:
-#    df.to_csv(f, index=False)
+with open(f'{args.embeds}.csv', 'w') as f:
+    df.to_csv(f, index=False)
 
-# Read dataframe from csv
-#df = pd.read_csv('embedding.csv')
-
-# Get embedding for GitHub issue title, body and comments
-#issue_embed = utils.get_issue_embed(repo_link, issue)
-
-# Get candidate files based on cosine similarity
-#if len(issue_embed) > 0: 
-#    files = utils.get_candidate_files(df, issue_embed)
-#    pprint.pprint(files)
+# Kill caffeinate process
+if caffeinate_process.poll() is None:
+    caffeinate_process.terminate()
