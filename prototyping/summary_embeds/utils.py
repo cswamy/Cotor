@@ -8,12 +8,15 @@ import time
 
 from typing import List
 from dotenv import load_dotenv
-from tenacity import retry, stop_after_attempt, wait_random_exponential
+from tenacity import retry, stop_after_attempt, wait_fixed, wait_random_exponential, retry_if_exception_type
 from tqdm.auto import tqdm
 from torch import cosine_similarity
 
+class StatusCodeError(Exception):
+    pass
+
 # helper function to call llm
-@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+@retry(retry=retry_if_exception_type(StatusCodeError), wait=wait_fixed(60), stop=stop_after_attempt(6))
 def call_llm(service: str, url: str, payload: dict):
     
     load_dotenv()
@@ -31,16 +34,24 @@ def call_llm(service: str, url: str, payload: dict):
             "content-type": "application/json",
             "authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}",
         }
+    elif service == 'groq':
+        headers = {
+            "content-type": "application/json",
+            "authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
+        }
+        #payload["model"] = "llama3-8b-8192"
+        payload["model"] = "mixtral-8x7b-32768"
+        payload["max_tokens"] = 2032
+        payload["temperature"] = 0
     
     response = None
     try:
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code != 200:
-            print(f"[ERROR] {service} request failure {response.text}")
-            if service == 'anthropic':
-                print(f"[INFO] Response header: {response.headers}")
-    except Exception as e:
+            raise StatusCodeError(f"{service} request failure {response.text}. Retrying...")
+    except StatusCodeError as e:
         print(e)
+        raise
     
     return response
 
@@ -74,7 +85,7 @@ def extract_repo_files(repo: str, repo_folders: List[str]) -> pd.DataFrame:
     for folder in repo_folders:
         for root, dirs, files in os.walk(folder):
             for file in files:
-                # if file in ['dataframe.py']:
+                #if file in ['dataframe.py']:
                 try: 
                     with open(f"{root}/{file}", 'r') as f:
                         source_code = f.read()
@@ -99,26 +110,78 @@ def add_code_summary(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
     - df: pd.DataFrame, pandas dataframe with ['repo', 'folder', 'file', 'raw_code', 'llm_summary', 'summary_embed']
     """
-    service = "anthropic"
-    url = "https://api.anthropic.com/v1/messages"
+    ### Anthropic test code below ###
+    #service = "anthropic"
+    #url = "https://api.anthropic.com/v1/messages"
+    #for index, row in tqdm(df.iterrows()):
+    #    print(f"Adding summary for row {index+1} of {len(df)}")
+    #    payload = {
+    #        "system": "Be precise and concise. Generate an explanation for code below.",
+    #        "messages": [
+    #            {
+    #                "role": "user",
+    #                "content": row['raw_code']
+    #            }
+    #        ]
+    #    }
+    #    response = call_llm(service, url, payload)
+    #    if response is not None and "content" in response.json():
+    #        df['llm_summary'][index] = response.json()['content'][0]['text']
+    #    else:
+    #        print(f"[ERROR] Adding summary failed for file: {row['file']}")
+    #    # Pause execution for 60 seconds to avoid rate limiting
+    #    time.sleep(60)
+    #return df
+
+    ### Groq test code below ###
+    #service = "groq"
+    #url = "https://api.groq.com/openai/v1/chat/completions"
+    #for index, row in tqdm(df.iterrows()):
+    #    print(f"Adding summary for row {index+1} of {len(df)}")
+    #    payload = {
+    #        "messages": [
+    #            {
+    #                "role": "system",
+    #                "content": "Be precise and concise. Generate an explanation for code below."
+    #            },
+    #            {
+    #                "role": "user",
+    #                "content": row['raw_code']
+    #            }
+    #        ]
+    #    }
+    #    response = call_llm(service, url, payload)
+    #    if response is not None and "choices" in response.json():
+    #        df['llm_summary'][index] = response.json()['choices'][0]['message']['content']
+    #    else:
+    #        print(f"[ERROR] Adding summary failed for file: {row['file']}")
+    #return df
+
+    ### OpenAI test code below ###
+    service = "openai"
+    url = "https://api.openai.com/v1/chat/completions"
     for index, row in tqdm(df.iterrows()):
         print(f"Adding summary for row {index+1} of {len(df)}")
         payload = {
-            "system": "Be precise and concise. Generate an explanation for code below.",
+            "model": "gpt-3.5-turbo-0125",
             "messages": [
+                {
+                    "role": "system",
+                    "content": "Be precise and concise. Generate an explanation for code below."
+                },
                 {
                     "role": "user",
                     "content": row['raw_code']
                 }
-            ]
+            ],
+            "temperature": 0,
+            "max_tokens": 1024,
         }
         response = call_llm(service, url, payload)
-        if response is not None and "content" in response.json():
-            df['llm_summary'][index] = response.json()['content'][0]['text']
+        if response is not None and "choices" in response.json():
+            df['llm_summary'][index] = response.json()['choices'][0]['message']['content']
         else:
             print(f"[ERROR] Adding summary failed for file: {row['file']}")
-        # Pause execution for 60 seconds to avoid rate limiting
-        time.sleep(60)
     return df
 
 def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:

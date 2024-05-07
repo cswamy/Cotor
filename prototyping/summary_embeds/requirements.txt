@@ -4,3 +4,4 @@ torch
 tenacity
 tqdm
 supabase
+groq
