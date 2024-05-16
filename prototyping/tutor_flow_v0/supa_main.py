@@ -57,5 +57,5 @@ payload: dict = {
 }
 
 response = call_llm(payload)
-with open('llm_response.txt', 'w') as f:
+with open('supa_llm_response.txt', 'w') as f:
     f.write(response.json()['choices'][0]['message']['content'])
