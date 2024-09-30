@@ -9,7 +9,6 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
-    "https://www.cotor.dev",
 ]
 
 app.add_middleware(
