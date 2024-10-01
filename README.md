@@ -8,5 +8,5 @@ The webapp is powered by a React front-end (with Material UI components), Python
 1. Host the React app on a service such as [AWS Amplify](https://aws.amazon.com/amplify/)
 2. The FastAPI app was hosted on AWS Elastic Beanstalk. Refer to this helpful [article](https://testdriven.io/blog/fastapi-elastic-beanstalk/) on how to set this up
 3. Setup an **Issues** table in Supabase. Refer to /researchissue route under API for schema details
-4. Setup your OpenAI API key
+4. Setup your OpenAI and GitHub API keys
 5. Setup authentication using Supabase with GitHub as provider 
